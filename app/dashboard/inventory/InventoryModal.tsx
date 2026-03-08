@@ -40,7 +40,7 @@ export function InventoryModal({ isOpen, onClose, editingItem, createMutation, u
                     product: "",
                     serialNumber: "",
                     unitType: "",
-                    status: "AVAILABLE",
+                    status: "IN_STOCK",
                 });
             }
         }

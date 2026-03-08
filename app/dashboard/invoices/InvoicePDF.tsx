@@ -228,7 +228,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
     const customerState = INDIAN_STATES.find(s => s.code === customer?.address?.stateCode)?.name || customer?.address?.state || '';
 
     const isSameState = (company?.address?.stateCode && (invoice.placeOfSupply || customer?.address?.stateCode))
-        ? company.address.stateCode === (invoice.placeOfSupply || customer?.address?.stateCode)
+        ? company?.address?.stateCode === (invoice.placeOfSupply || customer?.address?.stateCode)
         : true;
 
     const formatCurrency = (amount: number) => {
