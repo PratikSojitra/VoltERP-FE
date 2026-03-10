@@ -7,7 +7,7 @@ import { toWords } from 'number-to-words';
 const styles = StyleSheet.create({
     page: {
         padding: 20,
-        fontSize: 8,
+        fontSize: 9,
         fontFamily: 'Helvetica',
         color: '#000',
     },
@@ -37,17 +37,17 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     companyName: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: 'bold',
         textTransform: 'uppercase',
     },
     companySubText: {
-        fontSize: 7.5,
+        fontSize: 10,
         marginTop: 1,
         lineHeight: 1.2,
     },
     companyGstText: {
-        fontSize: 8.5,
+        fontSize: 10,
         fontWeight: 'bold',
         marginTop: 2,
     },
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#000',
         paddingBottom: 2,
-        fontSize: 9,
+        fontSize: 10,
         fontWeight: 'bold',
         alignSelf: 'center',
         textTransform: 'uppercase',
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
         minHeight: 100,
     },
     infoTitle: {
-        fontSize: 9,
+        fontSize: 10,
         fontWeight: 'bold',
         marginBottom: 3,
         fontStyle: 'italic',
@@ -101,11 +101,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#000',
         borderTopWidth: 0,
+        flex: 1,
     },
     tableRow: {
         flexDirection: 'row',
-        borderBottomWidth: 1,
-        borderBottomColor: '#000',
     },
     tableRowNoBorder: {
         flexDirection: 'row',
@@ -115,6 +114,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderBottomWidth: 1,
         borderBottomColor: '#000',
+    },
+    tableBodyContainer: {
+        flex: 1,
     },
     tableColHeader: {
         borderRightWidth: 1,
@@ -129,90 +131,132 @@ const styles = StyleSheet.create({
         padding: 2,
     },
     tableCellHeader: {
-        fontSize: 7.5,
+        fontSize: 8.5,
         fontWeight: 'bold',
         textAlign: 'center',
     },
     tableCell: {
-        fontSize: 7.5,
+        fontSize: 8.5,
     },
     tableCellRight: {
-        fontSize: 7.5,
+        fontSize: 8.5,
         textAlign: 'right',
     },
     tableCellCenter: {
-        fontSize: 7.5,
+        fontSize: 8.5,
         textAlign: 'center',
     },
-    subGrandTotalRow: {
+    summaryContainer: {
         flexDirection: 'row',
         borderWidth: 1,
         borderColor: '#000',
         borderTopWidth: 0,
-        padding: 3,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
     },
-    taxSummaryTable: {
-        marginTop: 5,
+    summaryLeft: {
+        width: '60%',
+        borderRightWidth: 1,
+        borderRightColor: '#000',
+    },
+    summaryRight: {
         width: '40%',
-        borderWidth: 1,
-        borderColor: '#000',
     },
-    taxRow: {
-        flexDirection: 'row',
-        borderBottomWidth: 0.5,
+    summaryLeftSection: {
+        borderBottomWidth: 1,
         borderBottomColor: '#000',
     },
-    taxHeaderCell: {
+    summaryHeader: {
+        fontSize: 8,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        padding: 3,
+        borderBottomWidth: 1,
+        borderBottomColor: '#000',
+    },
+    amountInWordsText: {
+        fontSize: 8,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        padding: 5,
+        textTransform: 'uppercase',
+    },
+    termsContent: {
+        padding: 5,
+        fontSize: 7.5,
+        lineHeight: 1.3,
+    },
+    summaryRow: {
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderBottomColor: '#000',
+    },
+    summaryLabel: {
         flex: 1,
-        borderRightWidth: 0.5,
+        padding: 3,
+        fontSize: 7.5,
+        borderRightWidth: 1,
         borderRightColor: '#000',
-        padding: 2,
+        fontWeight: 'bold',
+    },
+    summaryValue: {
+        width: '35%',
+        padding: 3,
+        fontSize: 7.5,
+        textAlign: 'right',
+        fontWeight: 'bold',
+    },
+    eAndOe: {
+        textAlign: 'right',
+        padding: 3,
         fontSize: 7,
+        fontWeight: 'bold',
+    },
+    signatureContainer: {
+        padding: 5,
+        alignItems: 'center',
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    certifyText: {
+        fontSize: 6.5,
+        textAlign: 'center',
+        marginBottom: 5,
+        fontWeight: 'bold',
+    },
+    companySignatureName: {
+        fontSize: 8,
         fontWeight: 'bold',
         textAlign: 'center',
     },
-    taxCell: {
-        flex: 1,
-        borderRightWidth: 0.5,
-        borderRightColor: '#000',
-        padding: 2,
-        fontSize: 7,
-        textAlign: 'right',
-    },
-    amountInWords: {
-        marginTop: 10,
+    authSignatory: {
+        fontSize: 7.5,
+        textAlign: 'center',
         fontWeight: 'bold',
-        fontSize: 9,
-    },
-    bankDetailsBox: {
-        marginTop: 5,
-        borderWidth: 1,
-        borderColor: '#000',
-        padding: 5,
-    },
-    footerSection: {
-        marginTop: 2,
-        flexDirection: 'row',
-        borderWidth: 1,
-        borderColor: '#000',
-        borderTopWidth: 0,
-    },
-    termsBox: {
-        flex: 1.5,
-        padding: 5,
-        borderRightWidth: 1,
-        borderColor: '#000',
-    },
-    signatureBox: {
-        flex: 1,
-        padding: 5,
-        textAlign: 'right',
-        justifyContent: 'space-between',
+        marginTop: 30,
     },
     bold: {
         fontWeight: 'bold',
+    },
+    bankDetailsBox: {
+        borderWidth: 1,
+        borderColor: '#000',
+        borderTopWidth: 0,
+        padding: 5,
+    },
+    receiverSignatureBlock: {
+        borderWidth: 1,
+        borderColor: '#000',
+        borderTopWidth: 0,
+    },
+    receiverSigRow1: {
+        padding: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: '#000',
+    },
+    receiverSigRow2: {
+        padding: 5,
+        minHeight: 70,
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
     }
 });
 
@@ -239,26 +283,12 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
     };
 
     const capitalizeFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-    const amountInWords = invoice.grandTotal ? capitalizeFirst(toWords(Math.floor(invoice.grandTotal)).replace(/-/g, ' ')) + ' Only' : '';
+    const amountInWords = invoice.grandTotal ? capitalizeFirst(toWords(Math.floor(invoice.grandTotal)).replace(/-/g, ' ')) + ' Rupees Only' : '';
 
-    // Calculate totals for tax summary
-    const groupedTaxes: Record<number, { taxable: number; cgst: number; sgst: number; igst: number }> = {};
-    invoice.items.forEach(item => {
-        const rate = item.gstRate || 0;
-        const sub = item.unitPrice * item.quantity;
-        const tax = item.totalPrice - sub;
-
-        if (!groupedTaxes[rate]) {
-            groupedTaxes[rate] = { taxable: 0, cgst: 0, sgst: 0, igst: 0 };
-        }
-        groupedTaxes[rate].taxable += sub;
-        if (isSameState) {
-            groupedTaxes[rate].cgst += tax / 2;
-            groupedTaxes[rate].sgst += tax / 2;
-        } else {
-            groupedTaxes[rate].igst += tax;
-        }
-    });
+    const totalQuantity = invoice.items.reduce((acc, i) => acc + i.quantity, 0);
+    const totalTaxableAmount = invoice.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+    const totalTaxAmount = invoice.items.reduce((acc, i) => acc + (i.totalPrice - (i.unitPrice * i.quantity)), 0);
+    const totalCgstSgstAmount = totalTaxAmount / 2;
 
     return (
         <Document>
@@ -275,7 +305,9 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
                             <Text style={styles.companySubText}>
                                 {company?.address?.street}, {company?.address?.city}, {companyState} - {company?.address?.zipCode}
                             </Text>
-                            <Text style={styles.companyGstText}>GSTIN : {company?.registrationNumber || 'Pending'}</Text>
+                            {(company?.taxId) ? (
+                                <Text style={styles.companyGstText}>GSTIN : {company?.taxId}</Text>
+                            ) : null}
                             <Text style={styles.companySubText}>Tel. : {company?.phone || ''} email : {company?.email || ''}</Text>
                         </View>
                         <View style={{ width: 80 }} />
@@ -334,99 +366,158 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
                     </View>
 
                     {/* Body */}
-                    {invoice.items.map((item: any, index) => {
-                        const product = item.product as any;
-                        const tax = item.totalPrice - (item.unitPrice * item.quantity);
-                        return (
-                            <View style={styles.tableRow} key={index}>
-                                <View style={[styles.tableCol, { width: '4%' }]}><Text style={styles.tableCellCenter}>{index + 1}.</Text></View>
-                                <View style={[styles.tableCol, { width: '26%' }]}>
-                                    <Text style={[styles.tableCell, styles.bold]}>{product?.name}</Text>
-                                    {item.inventory && <Text style={{ fontSize: 6.5, fontStyle: 'italic' }}>SN: {(item.inventory as any).serialNumber}</Text>}
+                    <View style={styles.tableBodyContainer}>
+                        {/* Data Rows */}
+                        {invoice.items.map((item: any, index) => {
+                            const product = item.product as any;
+                            const tax = item.totalPrice - (item.unitPrice * item.quantity);
+                            return (
+                                <View style={styles.tableRow} key={index}>
+                                    <View style={[styles.tableCol, { width: '4%' }]}><Text style={styles.tableCellCenter}>{index + 1}.</Text></View>
+                                    <View style={[styles.tableCol, { width: '26%' }]}>
+                                        <Text style={[styles.tableCell, styles.bold]}>{product?.name}</Text>
+                                        <Text style={{ fontSize: 7, fontStyle: 'italic', marginTop: 1 }}>{item.inventory ? `SN: ${(item.inventory as any).serialNumber}` : ''}</Text>
+                                    </View>
+                                    <View style={[styles.tableCol, { width: '10%' }]}><Text style={styles.tableCellCenter}>{product?.hsnCode || '84151010'}</Text></View>
+                                    <View style={[styles.tableCol, { width: '5%' }]}><Text style={styles.tableCellCenter}>{item.quantity.toFixed(2)}</Text></View>
+                                    <View style={[styles.tableCol, { width: '5%' }]}><Text style={styles.tableCellCenter}>Pcs.</Text></View>
+                                    <View style={[styles.tableCol, { width: '10%' }]}><Text style={styles.tableCellRight}>{formatCurrency(item.unitPrice)}</Text></View>
+                                    {isSameState ? (
+                                        <>
+                                            <View style={[styles.tableCol, { width: '6%' }]}><Text style={styles.tableCellRight}>{(item.gstRate / 2).toFixed(2)} %</Text></View>
+                                            <View style={[styles.tableCol, { width: '8%' }]}><Text style={styles.tableCellRight}>{formatCurrency(tax / 2)}</Text></View>
+                                            <View style={[styles.tableCol, { width: '6%' }]}><Text style={styles.tableCellRight}>{(item.gstRate / 2).toFixed(2)} %</Text></View>
+                                            <View style={[styles.tableCol, { width: '8%' }]}><Text style={styles.tableCellRight}>{formatCurrency(tax / 2)}</Text></View>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <View style={[styles.tableCol, { width: '14%' }]}><Text style={styles.tableCellRight}>{item.gstRate.toFixed(2)} %</Text></View>
+                                            <View style={[styles.tableCol, { width: '14%' }]}><Text style={styles.tableCellRight}>{formatCurrency(tax)}</Text></View>
+                                        </>
+                                    )}
+                                    <View style={[styles.tableCol, { width: '12%', borderRightWidth: 0 }]}><Text style={[styles.tableCellRight, styles.bold]}>{formatCurrency(item.totalPrice)}</Text></View>
                                 </View>
-                                <View style={[styles.tableCol, { width: '10%' }]}><Text style={styles.tableCellCenter}>{product?.hsnCode || '84151010'}</Text></View>
-                                <View style={[styles.tableCol, { width: '5%' }]}><Text style={styles.tableCellCenter}>{item.quantity.toFixed(2)}</Text></View>
-                                <View style={[styles.tableCol, { width: '5%' }]}><Text style={styles.tableCellCenter}>Pcs.</Text></View>
-                                <View style={[styles.tableCol, { width: '10%' }]}><Text style={styles.tableCellRight}>{formatCurrency(item.unitPrice)}</Text></View>
-                                {isSameState ? (
-                                    <>
-                                        <View style={[styles.tableCol, { width: '6%' }]}><Text style={styles.tableCellRight}>{(item.gstRate / 2).toFixed(2)} %</Text></View>
-                                        <View style={[styles.tableCol, { width: '8%' }]}><Text style={styles.tableCellRight}>{formatCurrency(tax / 2)}</Text></View>
-                                        <View style={[styles.tableCol, { width: '6%' }]}><Text style={styles.tableCellRight}>{(item.gstRate / 2).toFixed(2)} %</Text></View>
-                                        <View style={[styles.tableCol, { width: '8%' }]}><Text style={styles.tableCellRight}>{formatCurrency(tax / 2)}</Text></View>
-                                    </>
-                                ) : (
-                                    <>
-                                        <View style={[styles.tableCol, { width: '14%' }]}><Text style={styles.tableCellRight}>{item.gstRate.toFixed(2)} %</Text></View>
-                                        <View style={[styles.tableCol, { width: '14%' }]}><Text style={styles.tableCellRight}>{formatCurrency(tax)}</Text></View>
-                                    </>
-                                )}
-                                <View style={[styles.tableCol, { width: '12%', borderRightWidth: 0 }]}><Text style={[styles.tableCellRight, styles.bold]}>{formatCurrency(item.totalPrice)}</Text></View>
-                            </View>
-                        );
-                    })}
+                            );
+                        })}
 
-                    {/* Footer Row */}
-                    <View style={styles.tableRowNoBorder}>
-                        <View style={{ width: '30%', padding: 3 }}><Text style={[styles.tableCellHeader, { textAlign: 'right' }]}>Grand Total</Text></View>
-                        <View style={{ width: '10%', borderLeftWidth: 1, borderRightWidth: 1, borderColor: '#000', padding: 3 }}><Text style={[styles.tableCellHeader, { textAlign: 'center' }]}>{invoice.items.reduce((acc, i) => acc + i.quantity, 0).toFixed(2)}</Text></View>
-                        <View style={{ width: '10%', borderRightWidth: 1, borderColor: '#000', padding: 3 }}><Text style={[styles.tableCellHeader, { textAlign: 'center' }]}>Pcs.</Text></View>
-                        <View style={{ flex: 1 }} />
-                        <View style={{ width: '12%', borderLeftWidth: 1, borderColor: '#000', padding: 3 }}><Text style={[styles.tableCellHeader, { textAlign: 'right' }]}>{formatCurrency(invoice.grandTotal)}</Text></View>
-                    </View>
-                </View>
-
-                {/* Tax Summary Table */}
-                <View style={styles.taxSummaryTable}>
-                    <View style={styles.taxRow}>
-                        <Text style={styles.taxHeaderCell}>Tax Rate</Text>
-                        <Text style={styles.taxHeaderCell}>Taxable Amt.</Text>
-                        {isSameState ? (
-                            <>
-                                <Text style={styles.taxHeaderCell}>CGST Amt.</Text>
-                                <Text style={styles.taxHeaderCell}>SGST Amt.</Text>
-                            </>
-                        ) : (
-                            <Text style={styles.taxHeaderCell}>IGST Amt.</Text>
-                        )}
-                        <Text style={[styles.taxHeaderCell, { borderRightWidth: 0 }]}>Total Tax</Text>
-                    </View>
-                    {Object.entries(groupedTaxes).map(([rate, data]) => (
-                        <View style={styles.taxRow} key={rate}>
-                            <Text style={styles.taxCell}>{rate}%</Text>
-                            <Text style={styles.taxCell}>{formatCurrency(data.taxable)}</Text>
+                        {/* Blank Space Filler to draw the vertical lines to the bottom */}
+                        <View style={[styles.tableRow, { flex: 1 }]}>
+                            <View style={[styles.tableCol, { width: '4%' }]} />
+                            <View style={[styles.tableCol, { width: '26%' }]} />
+                            <View style={[styles.tableCol, { width: '10%' }]} />
+                            <View style={[styles.tableCol, { width: '5%' }]} />
+                            <View style={[styles.tableCol, { width: '5%' }]} />
+                            <View style={[styles.tableCol, { width: '10%' }]} />
                             {isSameState ? (
                                 <>
-                                    <Text style={styles.taxCell}>{formatCurrency(data.cgst)}</Text>
-                                    <Text style={styles.taxCell}>{formatCurrency(data.sgst)}</Text>
+                                    <View style={[styles.tableCol, { width: '6%' }]} />
+                                    <View style={[styles.tableCol, { width: '8%' }]} />
+                                    <View style={[styles.tableCol, { width: '6%' }]} />
+                                    <View style={[styles.tableCol, { width: '8%' }]} />
                                 </>
                             ) : (
-                                <Text style={styles.taxCell}>{formatCurrency(data.igst)}</Text>
+                                <>
+                                    <View style={[styles.tableCol, { width: '14%' }]} />
+                                    <View style={[styles.tableCol, { width: '14%' }]} />
+                                </>
                             )}
-                            <Text style={[styles.taxCell, { borderRightWidth: 0 }]}>{formatCurrency(data.cgst + data.sgst + data.igst)}</Text>
+                            <View style={[styles.tableCol, { width: '12%', borderRightWidth: 0 }]} />
                         </View>
-                    ))}
-                </View>
-
-                {/* Words and Bank */}
-                <Text style={styles.amountInWords}>Rupees {amountInWords}</Text>
-
-                <View style={styles.bankDetailsBox}>
-                    <Text style={styles.bold}>Bank Details : <Text style={{ fontWeight: 'normal' }}>{invoice.bankDetails || company?.bankDetails || 'N/A'}</Text></Text>
-                </View>
-
-                {/* Bottom Section */}
-                <View style={styles.footerSection}>
-                    <View style={styles.termsBox}>
-                        <Text style={[styles.bold, { textDecoration: 'underline', marginBottom: 2 }]}>Terms & Conditions</Text>
-                        <Text style={{ fontSize: 6.5 }}>{invoice.termsAndConditions || company?.termsAndConditions || 'E.& O.E.\n1. Goods once sold will not be taken back.'}</Text>
-                        <Text style={{ fontSize: 6.5, marginTop: 5 }}>3. Subject to 'Gujarat' Jurisdiction only.</Text>
                     </View>
-                    <View style={styles.signatureBox}>
-                        <Text style={[styles.bold, { textAlign: 'left' }]}>Receiver's Signature :</Text>
-                        <View>
-                            <Text style={styles.bold}>for {company?.name || 'ANSH ENTERPRISE'}</Text>
-                            <Text style={[styles.bold, { marginTop: 15 }]}>Authorised Signatory</Text>
+
+                    {/* Footer Row */}
+                    <View style={[styles.tableRowNoBorder, { borderTopWidth: 1, borderTopColor: '#000' }]}>
+                        <View style={{ width: '40%', padding: 3, borderRightWidth: 1, borderColor: '#000', justifyContent: 'center' }}><Text style={[styles.tableCellHeader, { textAlign: 'right' }]}>Total</Text></View>
+                        <View style={{ width: '5%', padding: 3, borderRightWidth: 1, borderColor: '#000', justifyContent: 'center' }}><Text style={[styles.tableCellHeader, { textAlign: 'center' }]}>{totalQuantity.toFixed(2)}</Text></View>
+                        <View style={{ width: '5%', padding: 3, borderRightWidth: 1, borderColor: '#000', justifyContent: 'center' }}><Text style={[styles.tableCellHeader, { textAlign: 'center' }]}></Text></View>
+                        <View style={{ width: '10%', padding: 3, borderRightWidth: 1, borderColor: '#000', justifyContent: 'center' }}><Text style={[styles.tableCellHeader, { textAlign: 'right' }]}>{formatCurrency(totalTaxableAmount)}</Text></View>
+                        {isSameState ? (
+                            <>
+                                <View style={{ width: '6%', padding: 3, borderRightWidth: 1, borderColor: '#000', justifyContent: 'center' }}><Text style={styles.tableCellHeader}></Text></View>
+                                <View style={{ width: '8%', padding: 3, borderRightWidth: 1, borderColor: '#000', justifyContent: 'center' }}><Text style={[styles.tableCellHeader, { textAlign: 'right' }]}>{formatCurrency(totalCgstSgstAmount)}</Text></View>
+                                <View style={{ width: '6%', padding: 3, borderRightWidth: 1, borderColor: '#000', justifyContent: 'center' }}><Text style={styles.tableCellHeader}></Text></View>
+                                <View style={{ width: '8%', padding: 3, borderRightWidth: 1, borderColor: '#000', justifyContent: 'center' }}><Text style={[styles.tableCellHeader, { textAlign: 'right' }]}>{formatCurrency(totalCgstSgstAmount)}</Text></View>
+                            </>
+                        ) : (
+                            <>
+                                <View style={{ width: '14%', padding: 3, borderRightWidth: 1, borderColor: '#000', justifyContent: 'center' }}><Text style={styles.tableCellHeader}></Text></View>
+                                <View style={{ width: '14%', padding: 3, borderRightWidth: 1, borderColor: '#000', justifyContent: 'center' }}><Text style={[styles.tableCellHeader, { textAlign: 'right' }]}>{formatCurrency(totalTaxAmount)}</Text></View>
+                            </>
+                        )}
+                        <View style={{ width: '12%', padding: 3, justifyContent: 'center' }}><Text style={[styles.tableCellHeader, { textAlign: 'right' }]}>{formatCurrency(invoice.grandTotal)}</Text></View>
+                    </View>
+                </View>
+
+                {/* Bottom Summary Section */}
+                <View style={styles.summaryContainer}>
+                    {/* Left Column */}
+                    <View style={styles.summaryLeft}>
+                        <View style={styles.summaryLeftSection}>
+                            <Text style={styles.summaryHeader}>Total in words</Text>
+                            <Text style={styles.amountInWordsText}>{amountInWords}</Text>
+                        </View>
+                        <View style={{ flex: 1, padding: 5 }}>
+                            <Text style={{ fontSize: 8, lineHeight: 1.3 }}>
+                                <Text style={styles.bold}>Bank Details : </Text>
+                                <Text style={{ fontWeight: 'normal' }}>{invoice.bankDetails || company?.bankDetails || 'N/A'}</Text>
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Right Column */}
+                    <View style={styles.summaryRight}>
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Taxable Amount</Text>
+                            <Text style={styles.summaryValue}>{formatCurrency(totalTaxableAmount)}</Text>
+                        </View>
+                        {isSameState ? (
+                            <>
+                                <View style={styles.summaryRow}>
+                                    <Text style={styles.summaryLabel}>Add : CGST</Text>
+                                    <Text style={styles.summaryValue}>{formatCurrency(totalCgstSgstAmount)}</Text>
+                                </View>
+                                <View style={styles.summaryRow}>
+                                    <Text style={styles.summaryLabel}>Add : SGST</Text>
+                                    <Text style={styles.summaryValue}>{formatCurrency(totalCgstSgstAmount)}</Text>
+                                </View>
+                            </>
+                        ) : (
+                            <View style={styles.summaryRow}>
+                                <Text style={styles.summaryLabel}>Add : IGST</Text>
+                                <Text style={styles.summaryValue}>{formatCurrency(totalTaxAmount)}</Text>
+                            </View>
+                        )}
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Total Tax</Text>
+                            <Text style={styles.summaryValue}>{formatCurrency(totalTaxAmount)}</Text>
+                        </View>
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Total Amount After Tax</Text>
+                            <Text style={[styles.summaryValue, { fontSize: 8.5 }]}>₹{formatCurrency(invoice.grandTotal)}</Text>
+                        </View>
+                        <Text style={styles.eAndOe}>(E & O.E.)</Text>
+                    </View>
+                </View>
+
+                {/* Bottom Terms & Signatures Block */}
+                <View style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#000', borderTopWidth: 0 }}>
+                    {/* Left Column - Terms & Conditions */}
+                    <View style={{ width: '60%', borderRightWidth: 1, borderColor: '#000', padding: 5 }}>
+                        <Text style={[styles.bold, { textDecoration: 'underline', marginBottom: 2, fontSize: 8 }]}>Terms & Conditions</Text>
+                        <Text style={{ fontSize: 7, fontWeight: 'bold' }}>E.& O.E.</Text>
+                        <Text style={{ fontSize: 7, marginTop: 2, lineHeight: 1.3 }}>
+                            {invoice.termsAndConditions || company?.termsAndConditions || "1. Goods once sold will not be taken back.\n2. Interest @ 18% p.a. will be charged if the payment for ANSH ENTERPRISE\nis not made with in the stipulated time.\n3. Subject to 'Gujarat' Jurisdiction only."}
+                        </Text>
+                    </View>
+
+                    {/* Right Column - Signatures */}
+                    <View style={{ width: '40%', flexDirection: 'column' }}>
+                        <View style={{ padding: 5, borderBottomWidth: 1, borderBottomColor: '#000' }}>
+                            <Text style={[styles.bold, { fontSize: 8 }]}>Receiver's Signature :</Text>
+                        </View>
+                        <View style={{ padding: 5, minHeight: 60, justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                            <Text style={[styles.bold, { fontSize: 9 }]}>for {company?.name || 'ANSH ENTERPRISE'}</Text>
+                            <Text style={[styles.bold, { fontSize: 9 }]}>Authorised Signatory</Text>
                         </View>
                     </View>
                 </View>

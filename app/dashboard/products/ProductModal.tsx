@@ -14,8 +14,18 @@ import { FormCombobox } from "@/components/ui/form-combobox";
 
 const HSN_DATA = [
     { code: "8415", description: "Air Conditioner", gstRate: 18 },
+    { code: "84151010", description: "Split Air Conditioner", gstRate: 18 },
+    { code: "84151020", description: "Window Air Conditioner", gstRate: 18 },
+    { code: "84152000", description: "Air Conditioner for Motor Vehicles", gstRate: 18 },
+    { code: "84159000", description: "Parts of Air Conditioner", gstRate: 18 },
+
+    { code: "74111000", description: "Copper Pipes and Tubes (AC Refrigerant Pipes)", gstRate: 18 },
+    { code: "40081100", description: "Rubber Insulation for AC Pipes", gstRate: 18 },
+    { code: "84143000", description: "Compressors used in Refrigeration and Air Conditioning", gstRate: 18 },
+    { code: "84818090", description: "Valves used in AC Systems", gstRate: 18 },
+
     { code: "8536", description: "Electrical Switches", gstRate: 18 },
-    { code: "8544", description: "Electrical Wires", gstRate: 18 },
+    { code: "8544", description: "Electrical Wires and Cables", gstRate: 18 }
 ];
 
 interface ProductModalProps {

@@ -16,7 +16,7 @@ export const useInvoices = () => {
         return useQuery<{ invoiceNumber: string }>({
             queryKey: ["invoices", "next-number", companyId],
             queryFn: () => apiService.get<{ invoiceNumber: string }>("/invoice/next-number", { companyId }),
-            enabled: true, // we might not always have companyId if it's the current user's company
+            enabled: !!companyId && companyId !== 'undefined',
         });
     };
 
