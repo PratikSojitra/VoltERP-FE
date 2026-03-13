@@ -10,16 +10,53 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useCompanies } from "@/hooks/useCompanies";
 import { companySchema, CompanyFormData } from "@/types/schemas";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SettingsPage() {
     const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
     const [activeTab, setActiveTab] = useState("profile");
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
+    
+    const { useChangePassword } = useAuth();
+    const changePasswordMutation = useChangePassword();
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+    });
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    const handlePasswordChange = async () => {
+        if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+            toast.error("Please fill all password fields");
+            return;
+        }
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            toast.error("New passwords do not match");
+            return;
+        }
+        if (passwordData.newPassword.length < 8) {
+            toast.error("New password must be at least 8 characters");
+            return;
+        }
+
+        changePasswordMutation.mutate({
+            currentPassword: passwordData.currentPassword,
+            newPassword: passwordData.newPassword
+        }, {
+            onSuccess: () => {
+                toast.success("Password changed successfully");
+                setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+            },
+            onError: (err: any) => {
+                toast.error(err.response?.data?.message || "Failed to change password");
+            }
+        });
+    };
 
     // Show loading if we have a token but no user data yet
     if (isAuthenticated && !user) {
@@ -89,20 +126,43 @@ export default function SettingsPage() {
                                 <div className="p-6 space-y-4 text-sm max-w-lg">
                                     <div className="space-y-1.5">
                                         <label className="text-sm font-medium">Current Password</label>
-                                        <input type="password" placeholder="••••••••" className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+                                        <input 
+                                            type="password" 
+                                            placeholder="••••••••" 
+                                            value={passwordData.currentPassword}
+                                            onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                                            className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" 
+                                        />
                                     </div>
                                     <div className="h-px bg-border my-4"></div>
                                     <div className="space-y-1.5">
                                         <label className="text-sm font-medium">New Password</label>
-                                        <input type="password" placeholder="••••••••" className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+                                        <input 
+                                            type="password" 
+                                            placeholder="••••••••" 
+                                            value={passwordData.newPassword}
+                                            onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                                            className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" 
+                                        />
                                         <p className="text-[11px] text-muted-foreground">Minimum 8 characters with numbers and symbols.</p>
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-sm font-medium">Confirm New Password</label>
-                                        <input type="password" placeholder="••••••••" className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+                                        <input 
+                                            type="password" 
+                                            placeholder="••••••••" 
+                                            value={passwordData.confirmPassword}
+                                            onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                                            className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" 
+                                        />
                                     </div>
                                     <div className="pt-4">
-                                        <button className="rounded-xl px-4 py-2.5 text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 shadow-sm transition-opacity w-full sm:w-auto">
+                                        <button 
+                                            onClick={handlePasswordChange}
+                                            disabled={changePasswordMutation.isPending}
+                                            className="rounded-xl px-4 py-2.5 text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 shadow-sm transition-opacity w-full sm:w-auto flex items-center justify-center gap-2"
+                                        >
+                                            {changePasswordMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                                             Change Password
                                         </button>
                                     </div>

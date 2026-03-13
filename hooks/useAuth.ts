@@ -37,9 +37,16 @@ export const useAuth = () => {
         return () => dispatch(logout());
     };
 
+    const useChangePassword = () => {
+        return useMutation({
+            mutationFn: (data: any) => apiService.post("/auth/change-password", data),
+        });
+    };
+
     return {
         useLogin,
         useGetProfile,
         useLogout,
+        useChangePassword,
     };
 };

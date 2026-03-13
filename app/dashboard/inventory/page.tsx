@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Plus, Edit, Trash2, PackageSearch, Loader2 } from "lucide-react";
+import { Search, Plus, Edit, Trash2, PackageSearch, Loader2, Scan } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
@@ -10,6 +10,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { Inventory, Product } from "@/types/api";
 import toast from "react-hot-toast";
 import { InventoryModal } from "./InventoryModal";
+import { ScannerModal } from "./ScannerModal";
 
 export default function InventoryPage() {
     const { useGetInventory, useCreateInventory, useUpdateInventory, useDeleteInventory } = useInventory();
@@ -24,6 +25,8 @@ export default function InventoryPage() {
     const deleteMutation = useDeleteInventory();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isScannerOpen, setIsScannerOpen] = useState(false);
+    const [scannedSerial, setScannedSerial] = useState("");
     const [editingItem, setEditingItem] = useState<Inventory | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -44,6 +47,13 @@ export default function InventoryPage() {
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setEditingItem(null);
+        setScannedSerial("");
+    };
+
+    const handleScanSuccess = (serial: string) => {
+        setScannedSerial(serial);
+        setIsScannerOpen(false);
+        setIsModalOpen(true);
     };
 
     const filtered = inventory?.filter(item => {
@@ -116,13 +126,22 @@ export default function InventoryPage() {
                         Track product serial numbers, statuses, and stock levels.
                     </p>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
-                >
-                    <Plus className="w-4 h-4" />
-                    Add Stock
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setIsScannerOpen(true)}
+                        className="flex items-center gap-2 rounded-xl border border-input bg-background px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground transition-all"
+                    >
+                        <Scan className="w-4 h-4 text-primary" />
+                        Scan Serial
+                    </button>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Add Stock
+                    </button>
+                </div>
             </div>
 
             <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-sm">
@@ -156,6 +175,13 @@ export default function InventoryPage() {
                 createMutation={createMutation}
                 updateMutation={updateMutation}
                 products={products}
+                prefilledSerialNumber={scannedSerial}
+            />
+
+            <ScannerModal 
+                isOpen={isScannerOpen}
+                onClose={() => setIsScannerOpen(false)}
+                onScanSuccess={handleScanSuccess}
             />
         </div>
     );

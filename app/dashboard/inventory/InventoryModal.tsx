@@ -19,9 +19,10 @@ interface InventoryModalProps {
     createMutation: any;
     updateMutation: any;
     products: any;
+    prefilledSerialNumber?: string;
 }
 
-export function InventoryModal({ isOpen, onClose, editingItem, createMutation, updateMutation, products }: InventoryModalProps) {
+export function InventoryModal({ isOpen, onClose, editingItem, createMutation, updateMutation, products, prefilledSerialNumber }: InventoryModalProps) {
     const { register, handleSubmit, reset, control, formState: { errors } } = useForm<InventoryFormData>({
         resolver: zodResolver(inventorySchema),
     });
@@ -38,13 +39,13 @@ export function InventoryModal({ isOpen, onClose, editingItem, createMutation, u
             } else {
                 reset({
                     product: "",
-                    serialNumber: "",
+                    serialNumber: prefilledSerialNumber || "",
                     unitType: "",
                     status: "IN_STOCK",
                 });
             }
         }
-    }, [editingItem, isOpen, reset]);
+    }, [editingItem, isOpen, reset, prefilledSerialNumber]);
 
     const onSubmit = (data: InventoryFormData) => {
         if (editingItem) {
