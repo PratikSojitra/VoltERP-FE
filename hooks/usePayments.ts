@@ -5,10 +5,17 @@ import { Payment, PaginatedResponse } from "@/types/api";
 export const usePayments = () => {
     const queryClient = useQueryClient();
 
-    const useGetPayments = (page: number = 1, limit: number = 10) => {
+    const useGetPayments = (
+        page: number = 1,
+        limit: number = 10,
+        search?: string,
+        status?: string,
+        startDate?: string,
+        endDate?: string
+    ) => {
         return useQuery<PaginatedResponse<Payment>>({
-            queryKey: ["payments", page, limit],
-            queryFn: () => apiService.get<PaginatedResponse<Payment>>("/payment", { page, limit }),
+            queryKey: ["payments", page, limit, search, status, startDate, endDate],
+            queryFn: () => apiService.get<PaginatedResponse<Payment>>("/payment", { page, limit, search, status, startDate, endDate }),
         });
     };
 

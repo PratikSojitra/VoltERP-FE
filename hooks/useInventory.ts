@@ -5,10 +5,10 @@ import { Inventory, PaginatedResponse } from "@/types/api";
 export const useInventory = () => {
     const queryClient = useQueryClient();
 
-    const useGetInventory = (page: number = 1, limit: number = 10) => {
+    const useGetInventory = (page: number = 1, limit: number = 10, search?: string, status?: string) => {
         return useQuery<PaginatedResponse<Inventory>>({
-            queryKey: ["inventory", page, limit],
-            queryFn: () => apiService.get<PaginatedResponse<Inventory>>("/inventory", { page, limit }),
+            queryKey: ["inventory", page, limit, search, status],
+            queryFn: () => apiService.get<PaginatedResponse<Inventory>>("/inventory", { page, limit, search, status }),
         });
     };
 

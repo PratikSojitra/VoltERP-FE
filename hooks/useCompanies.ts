@@ -5,10 +5,10 @@ import { Company, PaginatedResponse } from "@/types/api";
 export const useCompanies = () => {
     const queryClient = useQueryClient();
 
-    const useGetCompanies = (page: number = 1, limit: number = 10) => {
+    const useGetCompanies = (page: number = 1, limit: number = 10, search?: string) => {
         return useQuery<PaginatedResponse<Company>>({
-            queryKey: ["companies", page, limit],
-            queryFn: () => apiService.get<PaginatedResponse<Company>>("/company", { page, limit }),
+            queryKey: ["companies", page, limit, search],
+            queryFn: () => apiService.get<PaginatedResponse<Company>>("/company", { page, limit, search }),
         });
     };
 

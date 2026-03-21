@@ -1,41 +1,55 @@
+"use client";
+
 import {
     Activity,
     ArrowUpRight,
     Box,
     CreditCard,
-    Users
+    Users,
+    Loader2
 } from "lucide-react";
+import { useDashboard } from "@/hooks/useDashboard";
 
 export default function DashboardPage() {
+    const { data: dashboardData, isLoading } = useDashboard();
+
+    if (isLoading) {
+        return <div className="flex h-full items-center justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+    }
+
+    const { revenue = 0, users = 0, entities = 0, inventoryItems = 0, recentSales = [], entityType = "Companies" } = dashboardData || {};
+
+    const formattedRevenue = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(revenue);
+
     const stats = [
         {
             title: "Total Revenue",
-            value: "$45,231.89",
-            change: "+20.1% from last month",
+            value: formattedRevenue,
+            change: "from calculated invoice totals",
             icon: CreditCard,
             color: "text-blue-500",
             bg: "bg-blue-500/10",
         },
         {
-            title: "Active Customers",
-            value: "+2,350",
-            change: "+180.1% from last month",
+            title: "Total Customers",
+            value: users.toString(),
+            change: "active profiles",
             icon: Users,
             color: "text-emerald-500",
             bg: "bg-emerald-500/10",
         },
         {
-            title: "Active Companies",
-            value: "12",
-            change: "+19% from last month",
+            title: entityType === "Total Sales" ? "Total Sales" : "Active Companies",
+            value: entities.toString(),
+            change: entityType === "Total Sales" ? "invoices generated" : "active workspaces",
             icon: Activity,
             color: "text-purple-500",
             bg: "bg-purple-500/10",
         },
         {
             title: "Total Inventory",
-            value: "432",
-            change: "+201 since last week",
+            value: inventoryItems.toString(),
+            change: "items available in stock",
             icon: Box,
             color: "text-orange-500",
             bg: "bg-orange-500/10",
@@ -74,8 +88,8 @@ export default function DashboardPage() {
                             </div>
                             <div className="mt-4 flex items-center text-xs text-muted-foreground">
                                 <ArrowUpRight className="mr-1 h-3 w-3 text-emerald-500" />
-                                <span className="text-emerald-500 font-medium">{stat.change.split(' ')[0]}</span>
-                                <span className="ml-1">{stat.change.split(' ').slice(1).join(' ')}</span>
+                                <span className="text-emerald-500 font-medium">Updated</span>
+                                <span className="ml-1">{stat.change}</span>
                             </div>
                         </div>
                     );
@@ -94,23 +108,36 @@ export default function DashboardPage() {
                 <div className="rounded-2xl border border-border bg-card shadow-sm col-span-3 p-6 flex flex-col">
                     <div className="mb-4">
                         <h3 className="font-semibold text-lg">Recent Sales</h3>
-                        <p className="text-sm text-muted-foreground">You made 265 sales this month.</p>
+                        <p className="text-sm text-muted-foreground">Recent tracked invoice generations.</p>
                     </div>
                     <div className="space-y-6 flex-1 overflow-y-auto pr-2">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <div key={i} className="flex items-center justify-between group">
-                                <div className="flex items-center gap-4">
-                                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary border border-primary/20">
-                                        O{i}
+                        {recentSales.map((sale: any, i: number) => {
+                            const cname = sale.customer?.name || "Unknown Customer";
+                            const cemail = sale.customer?.email || sale.customer?.phone || "No contact info";
+                            const initials = cname.substring(0, 2).toUpperCase();
+                            const val = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(sale.grandTotal || 0);
+                            
+                            return (
+                                <div key={sale._id || i} className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary border border-primary/20">
+                                            {initials}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium leading-none group-hover:text-primary transition-colors">{cname}</p>
+                                            <p className="text-sm text-muted-foreground mt-1">{cemail}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">{new Date(sale.issueDate).toLocaleDateString()}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-medium leading-none group-hover:text-primary transition-colors">Olivia Martin</p>
-                                        <p className="text-sm text-muted-foreground mt-1">olivia.martin@email.com</p>
-                                    </div>
+                                    <div className="font-semibold text-sm text-emerald-600">+{val}</div>
                                 </div>
-                                <div className="font-semibold text-sm">+$1,999.00</div>
+                            );
+                        })}
+                        {recentSales.length === 0 && (
+                            <div className="text-sm text-center text-muted-foreground mt-6">
+                                No sales recorded yet.
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
             </div>

@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/store/authSlice";
 import { RootState } from "@/store/store";
@@ -22,6 +25,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     const dispatch = useDispatch();
+    const pathname = usePathname();
     const { user } = useSelector((state: RootState) => state.auth);
 
     const allLinks = [
@@ -68,14 +72,15 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                     </div>
                     {links.map((link) => {
                         const Icon = link.icon;
+                        const isActive = link.href === "/dashboard" ? pathname === "/dashboard" : pathname?.startsWith(link.href);
                         return (
                             <Link
                                 key={link.name}
                                 href={link.href}
                                 onClick={() => setIsOpen(false)}
-                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-foreground hover:bg-primary/5 hover:text-primary transition-all duration-200 group"
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-primary/5 hover:text-primary"}`}
                             >
-                                <Icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <Icon className={`w-4 h-4 transition-colors ${isActive ? "text-primary" : "text-muted-foreground group-hover:text-primary"}`} />
                                 {link.name}
                             </Link>
                         );
@@ -87,9 +92,9 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                         <Link
                             href="/dashboard/settings"
                             onClick={() => setIsOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors group"
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group ${pathname?.startsWith("/dashboard/settings") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}
                         >
-                            <Settings className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
+                            <Settings className={`w-4 h-4 ${pathname?.startsWith("/dashboard/settings") ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`} />
                             Settings
                         </Link>
                         <button

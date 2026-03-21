@@ -5,10 +5,17 @@ import { Invoice, PaginatedResponse } from "@/types/api";
 export const useInvoices = () => {
     const queryClient = useQueryClient();
 
-    const useGetInvoices = (page: number = 1, limit: number = 10) => {
+    const useGetInvoices = (
+        page: number = 1,
+        limit: number = 10,
+        search?: string,
+        status?: string,
+        startDate?: string,
+        endDate?: string
+    ) => {
         return useQuery<PaginatedResponse<Invoice>>({
-            queryKey: ["invoices", page, limit],
-            queryFn: () => apiService.get<PaginatedResponse<Invoice>>("/invoice", { page, limit }),
+            queryKey: ["invoices", page, limit, search, status, startDate, endDate],
+            queryFn: () => apiService.get<PaginatedResponse<Invoice>>("/invoice", { page, limit, search, status, startDate, endDate }),
         });
     };
 

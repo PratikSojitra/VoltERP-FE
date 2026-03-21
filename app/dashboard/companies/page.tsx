@@ -8,19 +8,21 @@ import { useCompanies } from "@/hooks/useCompanies";
 import { Company } from "@/types/api";
 import toast from "react-hot-toast";
 import { CompanyModal } from "./CompanyModal";
+import { CompanyViewModal } from "./CompanyViewModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function CompaniesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isViewOpen, setIsViewOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [editingCompany, setEditingCompany] = useState<Company | null>(null);
     const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
 
     const { useGetCompanies, useCreateCompany, useUpdateCompany, useDeleteCompany } = useCompanies();
     const [page, setPage] = useState(1);
-    const { data: paginatedData, isLoading, error } = useGetCompanies(page, 10);
+    const { data: paginatedData, isLoading, error } = useGetCompanies(page, 10, searchQuery);
     const companies = paginatedData?.data || [];
     const totalPages = paginatedData?.totalPages || 1;
     const createMutation = useCreateCompany();
@@ -38,8 +40,12 @@ export default function CompaniesPage() {
 
     const handleOpenModal = (company?: Company, mode: 'create' | 'edit' | 'view' = 'create') => {
         setEditingCompany(company || null);
-        setModalMode(mode);
-        setIsModalOpen(true);
+        if (mode === 'view') {
+            setIsViewOpen(true);
+        } else {
+            setModalMode(mode);
+            setIsModalOpen(true);
+        }
     };
 
     const handleCloseModal = () => {
@@ -110,10 +116,7 @@ export default function CompaniesPage() {
         },
     ];
 
-    const filteredCompanies = (companies || []).filter(c =>
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+
 
     if (error) return <div className="p-8 text-center text-destructive">Error loading companies.</div>;
 
@@ -146,7 +149,10 @@ export default function CompaniesPage() {
                             placeholder="Search companies..."
                             className="pl-9 h-10 w-full"
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setPage(1);
+                            }}
                         />
                     </div>
                 </CardContent>
@@ -159,7 +165,7 @@ export default function CompaniesPage() {
             ) : (
                 <DataTable
                     columns={columns}
-                    data={filteredCompanies}
+                    data={companies}
                     page={page}
                     totalPages={totalPages}
                     onPageChange={setPage}
@@ -173,6 +179,12 @@ export default function CompaniesPage() {
                 createMutation={createMutation}
                 updateMutation={updateMutation}
                 mode={modalMode}
+            />
+
+            <CompanyViewModal
+                isOpen={isViewOpen}
+                onClose={() => setIsViewOpen(false)}
+                company={editingCompany}
             />
         </div>
     );

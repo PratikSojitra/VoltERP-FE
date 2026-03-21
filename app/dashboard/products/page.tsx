@@ -1,22 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Plus, Edit, Trash2, Box, Loader2 } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Box, Loader2, Eye } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/types/api";
 import toast from "react-hot-toast";
 import { ProductModal } from "./ProductModal";
+import { ProductViewModal } from "./ProductViewModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function ProductsPage() {
-    const { useGetProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } = useProducts();
     const [page, setPage] = useState(1);
-    const { data: paginatedData, isLoading } = useGetProducts(page, 10);
+    const [searchQuery, setSearchQuery] = useState("");
+    
+    const { useGetProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } = useProducts();
+    const { data: paginatedData, isLoading } = useGetProducts(page, 10, searchQuery);
     const products = paginatedData?.data || [];
     const totalPages = paginatedData?.totalPages || 1;
 
@@ -25,12 +27,18 @@ export default function ProductsPage() {
     const deleteMutation = useDeleteProduct();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isViewOpen, setIsViewOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-    const [searchQuery, setSearchQuery] = useState("");
+
 
     const handleEdit = (product: Product) => {
         setEditingProduct(product);
         setIsModalOpen(true);
+    };
+
+    const handleView = (product: Product) => {
+        setEditingProduct(product);
+        setIsViewOpen(true);
     };
 
     const handleDelete = (id: string) => {
@@ -47,7 +55,7 @@ export default function ProductsPage() {
         setEditingProduct(null);
     };
 
-    const filtered = products?.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())) || [];
+
 
     const columns: ColumnDef<Product>[] = [
         {
@@ -96,10 +104,13 @@ export default function ProductsPage() {
             header: () => <div className="text-right">Actions</div>,
             cell: ({ row }) => (
                 <div className="flex justify-end gap-1 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon-sm" onClick={() => handleEdit(row.original)} className="hover:text-primary">
+                    <Button variant="ghost" size="icon-sm" onClick={() => handleView(row.original)} className="hover:text-primary" title="View Details">
+                        <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon-sm" onClick={() => handleEdit(row.original)} className="hover:text-primary" title="Edit Product">
                         <Edit className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" onClick={() => handleDelete(row.original._id)} className="hover:text-destructive">
+                    <Button variant="ghost" size="icon-sm" onClick={() => handleDelete(row.original._id)} className="hover:text-destructive" title="Delete Product">
                         <Trash2 className="w-4 h-4" />
                     </Button>
                 </div>
@@ -128,26 +139,27 @@ export default function ProductsPage() {
                 </Button>
             </div>
 
-            <Card className="rounded-2xl shadow-sm overflow-hidden">
-                <CardContent className="p-4">
-                    <div className="relative w-full max-w-sm">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                        <Input
-                            placeholder="Search products..."
-                            className="pl-9 h-10 w-full"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+                <div className="relative flex-1 min-w-[280px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                    <Input
+                        placeholder="Search products..."
+                        className="pl-9 h-10 w-full"
+                        value={searchQuery}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setPage(1);
+                        }}
+                    />
+                </div>
+            </div>
 
             {isLoading ? (
                 <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
             ) : (
                 <DataTable
                     columns={columns}
-                    data={filtered}
+                    data={products}
                     page={page}
                     totalPages={totalPages}
                     onPageChange={setPage}
@@ -160,6 +172,12 @@ export default function ProductsPage() {
                 editingProduct={editingProduct}
                 createMutation={createMutation}
                 updateMutation={updateMutation}
+            />
+
+            <ProductViewModal
+                isOpen={isViewOpen}
+                onClose={() => setIsViewOpen(false)}
+                product={editingProduct}
             />
         </div>
     );

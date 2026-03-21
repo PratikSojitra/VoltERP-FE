@@ -2,17 +2,32 @@
 
 import { useState } from "react";
 import { Search, Plus, Edit, Trash2, CreditCard, Loader2, Eye } from "lucide-react";
+import {
+    Combobox,
+    ComboboxInput,
+    ComboboxContent,
+    ComboboxList,
+    ComboboxItem,
+    ComboboxEmpty,
+} from "@/components/ui/combobox";
+import { Input } from "@/components/ui/input";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import { usePayments } from "@/hooks/usePayments";
 import { Payment } from "@/types/api";
 import { PaymentModal } from "./PaymentModal";
+import { PaymentViewModal } from "./PaymentViewModal";
 import toast from "react-hot-toast";
 
 export default function PaymentsPage() {
-    const { useGetPayments, useCreatePayment, useUpdatePayment, useDeletePayment } = usePayments();
     const [page, setPage] = useState(1);
-    const { data: paginatedData, isLoading } = useGetPayments(page, 10);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filterStatus, setFilterStatus] = useState<string>("");
+    const [startDate, setStartDate] = useState<string>("");
+    const [endDate, setEndDate] = useState<string>("");
+
+    const { useGetPayments, useCreatePayment, useUpdatePayment, useDeletePayment } = usePayments();
+    const { data: paginatedData, isLoading } = useGetPayments(page, 10, searchQuery, filterStatus, startDate, endDate);
     const payments = paginatedData?.data || [];
     const totalPages = paginatedData?.totalPages || 1;
 
@@ -21,14 +36,19 @@ export default function PaymentsPage() {
     const deleteMutation = useDeletePayment();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isViewOpen, setIsViewOpen] = useState(false);
     const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
     const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
-    const [searchQuery, setSearchQuery] = useState("");
+
 
     const handleOpenModal = (payment?: Payment, mode: 'create' | 'edit' | 'view' = 'create') => {
         setEditingPayment(payment || null);
-        setModalMode(mode);
-        setIsModalOpen(true);
+        if (mode === 'view') {
+            setIsViewOpen(true);
+        } else {
+            setModalMode(mode);
+            setIsModalOpen(true);
+        }
     };
 
     const handleDelete = (id: string) => {
@@ -139,13 +159,7 @@ export default function PaymentsPage() {
         },
     ];
 
-    const filtered = payments.filter((p: Payment) => {
-        const invoice = p.invoice as any;
-        const customer = p.customer as any;
-        return (p.referenceNumber && p.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (invoice?.invoiceNumber && invoice.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (customer?.name && customer.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    });
+
 
     return (
         <div className="space-y-6">
@@ -168,15 +182,84 @@ export default function PaymentsPage() {
                 </button>
             </div>
 
-            <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-sm">
-                <div className="relative w-full max-w-sm">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <input
-                        placeholder="Search invoice # or customer..."
-                        className="h-9 w-full rounded-xl border border-input bg-muted/50 pl-9 pr-4 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:bg-background"
+            <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+                <div className="relative flex-1 min-w-[280px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                    <Input
+                        placeholder="Search by ref or customer name..."
+                        className="pl-9 h-10 w-full"
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setPage(1);
+                        }}
                     />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                    <Combobox
+                        value={
+                            filterStatus === "all" || !filterStatus 
+                                ? { label: "All Statuses", value: "all" }
+                                : { label: filterStatus, value: filterStatus }
+                        }
+                        onValueChange={(val: any) => {
+                            const newValue = val ? val.value : "all";
+                            setFilterStatus(newValue === "all" ? "" : newValue);
+                            setPage(1);
+                        }}
+                    >
+                        <ComboboxInput 
+                            placeholder="All Statuses" 
+                            className="h-10 min-w-36" 
+                        />
+                        <ComboboxContent>
+                            <ComboboxList>
+                                <ComboboxEmpty>No results found.</ComboboxEmpty>
+                                <ComboboxItem value={{ label: "All Statuses", value: "all" }}>All Statuses</ComboboxItem>
+                                <ComboboxItem value={{ label: "COMPLETED", value: "COMPLETED" }}>COMPLETED</ComboboxItem>
+                                <ComboboxItem value={{ label: "PENDING", value: "PENDING" }}>PENDING</ComboboxItem>
+                                <ComboboxItem value={{ label: "FAILED", value: "FAILED" }}>FAILED</ComboboxItem>
+                            </ComboboxList>
+                        </ComboboxContent>
+                    </Combobox>
+
+                    <div className="flex items-center gap-2">
+                        <Input
+                            type="date"
+                            className="h-10 w-36"
+                            value={startDate}
+                            onChange={(e) => {
+                                setStartDate(e.target.value);
+                                setPage(1);
+                            }}
+                        />
+                        <span className="text-muted-foreground text-sm mx-1">to</span>
+                        <Input
+                            type="date"
+                            className="h-10 w-36"
+                            value={endDate}
+                            onChange={(e) => {
+                                setEndDate(e.target.value);
+                                setPage(1);
+                            }}
+                        />
+                    </div>
+
+                    {(searchQuery || filterStatus || startDate || endDate) && (
+                        <button
+                            onClick={() => {
+                                setSearchQuery("");
+                                setFilterStatus("");
+                                setStartDate("");
+                                setEndDate("");
+                                setPage(1);
+                            }}
+                            className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 ml-2"
+                        >
+                            Reset Defaults
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -185,7 +268,7 @@ export default function PaymentsPage() {
             ) : (
                 <DataTable
                     columns={columns}
-                    data={filtered}
+                    data={payments}
                     page={page}
                     totalPages={totalPages}
                     onPageChange={setPage}
@@ -199,6 +282,12 @@ export default function PaymentsPage() {
                 createMutation={createMutation}
                 updateMutation={updateMutation}
                 mode={modalMode}
+            />
+
+            <PaymentViewModal
+                isOpen={isViewOpen}
+                onClose={() => setIsViewOpen(false)}
+                payment={editingPayment}
             />
         </div>
     );

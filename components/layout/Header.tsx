@@ -26,14 +26,14 @@ export function Header({ setSidebarOpen }: HeaderProps) {
                 >
                     <Menu className="w-5 h-5" />
                 </button>
-                <div className="relative w-full hidden sm:block">
+                {/* <div className="relative w-full hidden sm:block">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <input
                         type="text"
                         placeholder="Search ERP globally (Ctrl+K)..."
                         className="h-9 w-full rounded-full border border-input bg-muted/50 pl-9 pr-4 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:bg-background"
                     />
-                </div>
+                </div> */}
             </div>
 
             <div className="flex items-center gap-4">

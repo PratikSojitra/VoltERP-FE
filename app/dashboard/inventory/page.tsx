@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Plus, Edit, Trash2, PackageSearch, Loader2, Scan } from "lucide-react";
+import { Search, Plus, Edit, Trash2, PackageSearch, Loader2, Scan, Eye } from "lucide-react";
+import {
+    Combobox,
+    ComboboxInput,
+    ComboboxContent,
+    ComboboxList,
+    ComboboxItem,
+    ComboboxEmpty,
+} from "@/components/ui/combobox";
+import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
@@ -10,13 +19,17 @@ import { useProducts } from "@/hooks/useProducts";
 import { Inventory, Product } from "@/types/api";
 import toast from "react-hot-toast";
 import { InventoryModal } from "./InventoryModal";
+import { InventoryViewModal } from "./InventoryViewModal";
 import { ScannerModal } from "./ScannerModal";
 
 export default function InventoryPage() {
+    const [page, setPage] = useState(1);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filterStatus, setFilterStatus] = useState<string>("");
+
     const { useGetInventory, useCreateInventory, useUpdateInventory, useDeleteInventory } = useInventory();
     const { useGetProducts } = useProducts();
-    const [page, setPage] = useState(1);
-    const { data: paginatedData, isLoading: isInventoryLoading } = useGetInventory(page, 10);
+    const { data: paginatedData, isLoading: isInventoryLoading } = useGetInventory(page, 10, searchQuery, filterStatus);
     const inventory = paginatedData?.data || [];
     const totalPages = paginatedData?.totalPages || 1;
     const { data: products } = useGetProducts();
@@ -25,14 +38,20 @@ export default function InventoryPage() {
     const deleteMutation = useDeleteInventory();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isViewOpen, setIsViewOpen] = useState(false);
     const [isScannerOpen, setIsScannerOpen] = useState(false);
     const [scannedSerial, setScannedSerial] = useState("");
     const [editingItem, setEditingItem] = useState<Inventory | null>(null);
-    const [searchQuery, setSearchQuery] = useState("");
+
 
     const handleEdit = (item: Inventory) => {
         setEditingItem(item);
         setIsModalOpen(true);
+    };
+
+    const handleView = (item: Inventory) => {
+        setEditingItem(item);
+        setIsViewOpen(true);
     };
 
     const handleDelete = (id: string) => {
@@ -56,11 +75,7 @@ export default function InventoryPage() {
         setIsModalOpen(true);
     };
 
-    const filtered = inventory?.filter(item => {
-        const productName = typeof item.product === 'string' ? '' : item.product.name;
-        return productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.serialNumber.toLowerCase().includes(searchQuery.toLowerCase());
-    }) || [];
+
 
     const columns: ColumnDef<Inventory>[] = [
         {
@@ -103,6 +118,9 @@ export default function InventoryPage() {
             header: () => <div className="text-right">Actions</div>,
             cell: ({ row }) => (
                 <div className="flex justify-end gap-2 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => handleView(row.original)} className="p-2 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors" title="View Full Info">
+                        <Eye className="w-4 h-4" />
+                    </button>
                     <button onClick={() => handleEdit(row.original)} className="p-2 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
                         <Edit className="w-4 h-4" />
                     </button>
@@ -144,15 +162,61 @@ export default function InventoryPage() {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-sm">
-                <div className="relative w-full max-w-sm">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <input
+            <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+                <div className="relative flex-1 min-w-[280px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                    <Input
                         placeholder="Search serial number or product..."
-                        className="h-9 w-full rounded-xl border border-input bg-muted/50 pl-9 pr-4 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:bg-background"
+                        className="pl-9 h-10 w-full"
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setPage(1);
+                        }}
                     />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                    <Combobox
+                        value={
+                            filterStatus === "all" || !filterStatus 
+                                ? { label: "All Statuses", value: "all" }
+                                : { label: filterStatus, value: filterStatus }
+                        }
+                        onValueChange={(val: any) => {
+                            const newValue = val ? val.value : "all";
+                            setFilterStatus(newValue === "all" ? "" : newValue);
+                            setPage(1);
+                        }}
+                    >
+                        <ComboboxInput 
+                            placeholder="All Statuses" 
+                            className="h-10 min-w-36" 
+                        />
+                        <ComboboxContent>
+                            <ComboboxList>
+                                <ComboboxEmpty>No results found.</ComboboxEmpty>
+                                <ComboboxItem value={{ label: "All Statuses", value: "all" }}>All Statuses</ComboboxItem>
+                                <ComboboxItem value={{ label: "AVAILABLE", value: "AVAILABLE" }}>AVAILABLE</ComboboxItem>
+                                <ComboboxItem value={{ label: "RESERVED", value: "RESERVED" }}>RESERVED</ComboboxItem>
+                                <ComboboxItem value={{ label: "SOLD", value: "SOLD" }}>SOLD</ComboboxItem>
+                                <ComboboxItem value={{ label: "DEFECTIVE", value: "DEFECTIVE" }}>DEFECTIVE</ComboboxItem>
+                            </ComboboxList>
+                        </ComboboxContent>
+                    </Combobox>
+
+                    {(searchQuery || filterStatus) && (
+                        <button
+                            onClick={() => {
+                                setSearchQuery("");
+                                setFilterStatus("");
+                                setPage(1);
+                            }}
+                            className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 ml-2"
+                        >
+                            Reset Defaults
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -161,7 +225,7 @@ export default function InventoryPage() {
             ) : (
                 <DataTable
                     columns={columns}
-                    data={filtered}
+                    data={inventory}
                     page={page}
                     totalPages={totalPages}
                     onPageChange={setPage}
@@ -176,6 +240,12 @@ export default function InventoryPage() {
                 updateMutation={updateMutation}
                 products={products}
                 prefilledSerialNumber={scannedSerial}
+            />
+
+            <InventoryViewModal
+                isOpen={isViewOpen}
+                onClose={() => setIsViewOpen(false)}
+                item={editingItem}
             />
 
             <ScannerModal 
