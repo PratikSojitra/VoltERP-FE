@@ -115,6 +115,45 @@ export interface Payment {
     updatedAt: string;
 }
 
+export interface Vendor {
+    _id: string;
+    name: string;
+    email?: string;
+    phone: string;
+    gstNumber?: string;
+    address?: Address;
+    company: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface PurchaseItem {
+    _id?: string;
+    product: Product | string;
+    quantity: number;
+    unitPrice: number;
+    gstRate?: number;
+    totalPrice?: number;
+    serialNumbers?: string[];
+    unitType?: string;
+}
+
+export interface Purchase {
+    _id: string;
+    invoiceNumber: string;
+    vendor: Vendor | string;
+    purchaseDate: string;
+    subTotal?: number;
+    totalTax?: number;
+    grandTotal?: number;
+    totalAmount: number;
+    status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
+    items: PurchaseItem[];
+    company: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface ApiResponse<T> {
     data: T;
     message?: string;

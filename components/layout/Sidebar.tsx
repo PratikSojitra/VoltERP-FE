@@ -32,7 +32,9 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         { name: "Dashboard", href: "/dashboard", icon: Home, roles: ["ADMIN", "COMPANY"] },
         { name: "Companies", href: "/dashboard/companies", icon: Activity, roles: ["ADMIN"] },
         { name: "Customers", href: "/dashboard/customers", icon: Users, roles: ["ADMIN", "COMPANY"] },
+        { name: "Vendors", href: "/dashboard/vendors", icon: Users, roles: ["ADMIN", "COMPANY"] },
         { name: "Products", href: "/dashboard/products", icon: Box, roles: ["ADMIN", "COMPANY"] },
+        { name: "Purchases", href: "/dashboard/purchases", icon: Box, roles: ["ADMIN", "COMPANY"] }, // ShoppingCart icon not imported, fallback to Box or add ShoppingCart
         { name: "Inventory", href: "/dashboard/inventory", icon: PackageSearch, roles: ["ADMIN", "COMPANY"] },
         { name: "Invoices", href: "/dashboard/invoices", icon: FileText, roles: ["ADMIN", "COMPANY"] },
         { name: "Payments", href: "/dashboard/payments", icon: CreditCard, roles: ["ADMIN", "COMPANY"] },

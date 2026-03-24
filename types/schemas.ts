@@ -81,3 +81,48 @@ export const paymentSchema = z.object({
 });
 
 export type PaymentFormData = z.infer<typeof paymentSchema>;
+
+export const vendorSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Invalid email address").optional().or(z.literal("")),
+    phone: z.string().min(6, "Phone number is required"),
+    gstNumber: z.string()
+        .optional()
+        .or(z.literal(""))
+        .refine((val) => !val || gstRegex.test(val), "Invalid GST Number format"),
+    address: z.object({
+        street: z.string().optional().or(z.literal("")),
+        city: z.string().optional().or(z.literal("")),
+        state: z.string().optional().or(z.literal("")),
+        stateCode: z.string().optional().or(z.literal("")),
+        zipCode: z.string().optional().or(z.literal("")),
+        country: z.string().optional().or(z.literal("")),
+    }).optional(),
+});
+
+export type VendorFormData = z.infer<typeof vendorSchema>;
+
+export const purchaseItemSchema = z.object({
+    product: z.string().min(1, "Product is required"),
+    quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
+    unitPrice: z.coerce.number().min(0, "Unit price cannot be negative"),
+    gstRate: z.coerce.number().min(0).optional(),
+    totalPrice: z.coerce.number().min(0).optional(),
+    serialNumbers: z.array(z.string()).optional(),
+    unitType: z.string().optional(),
+});
+
+export const purchaseSchema = z.object({
+    invoiceNumber: z.string().min(1, "Invoice number is required"),
+    vendor: z.string().min(1, "Vendor is required"),
+    purchaseDate: z.string().min(1, "Purchase date is required"),
+    subTotal: z.coerce.number().optional(),
+    totalTax: z.coerce.number().optional(),
+    grandTotal: z.coerce.number().optional(),
+    totalAmount: z.coerce.number().min(0, "Total amount cannot be negative"), // kept for backwards compatibility
+    status: z.enum(["PENDING", "COMPLETED", "CANCELLED"]),
+    items: z.array(purchaseItemSchema).min(1, "At least one item is required"),
+});
+
+export type PurchaseItemFormData = z.infer<typeof purchaseItemSchema>;
+export type PurchaseFormData = z.infer<typeof purchaseSchema>;
