@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Plus, Trash2, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, Loader2, FileText } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
@@ -13,27 +13,31 @@ import { Label } from "@/components/ui/label";
 import { FormCombobox } from "@/components/ui/form-combobox";
 import { FormSelect } from "@/components/ui/form-select";
 import { TagInput } from "@/components/ui/tag-input";
-
 import { useVendors } from "@/hooks/useVendors";
 import { useProducts } from "@/hooks/useProducts";
 import { usePurchases } from "@/hooks/usePurchases";
+import { useAuth } from "@/hooks/useAuth";
 import { purchaseSchema, PurchaseFormData } from "@/types/schemas";
 import { VendorModal } from "@/app/dashboard/vendors/VendorModal";
 import { INDIAN_STATES } from "@/constants/states";
+import { PurchaseViewModal } from "../../PurchaseViewModal";
 
 export default function EditPurchasePage() {
     const router = useRouter();
     const params = useParams();
     const id = params?.id as string;
     const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     const { useGetVendors, useCreateVendor, useUpdateVendor } = useVendors();
     const { useGetProducts } = useProducts();
     const { useGetPurchase, useUpdatePurchase } = usePurchases();
+    const { useGetProfile } = useAuth();
 
     const { data: vendorsData } = useGetVendors(1, 100);
     const { data: productsData } = useGetProducts(1, 100);
     const { data: purchaseData, isLoading: isLoadingPurchase } = useGetPurchase(id);
+    const { data: companyData } = useGetProfile();
     const updateMutation = useUpdatePurchase();
 
     const createVendorMutation = useCreateVendor();
@@ -163,6 +167,12 @@ export default function EditPurchasePage() {
                     </div>
                 </div>
                 <div className="flex gap-3">
+                    {purchaseData && companyData && (
+                        <Button variant="outline" className="gap-2" onClick={() => setIsPreviewOpen(true)}>
+                            <FileText className="w-4 h-4" />
+                            Print/Record
+                        </Button>
+                    )}
                     <Button variant="outline" onClick={() => router.back()}>Cancel</Button>
                     <Button onClick={handleSubmit(onSubmit as any)} disabled={updateMutation.isPending} className="gap-2">
                         {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -494,6 +504,13 @@ export default function EditPurchasePage() {
                 editingVendor={null}
                 createMutation={wrappedCreateVendorMutation}
                 updateMutation={updateVendorMutation}
+            />
+
+            <PurchaseViewModal
+                isOpen={isPreviewOpen}
+                onClose={() => setIsPreviewOpen(false)}
+                purchase={purchaseData || null}
+                company={companyData || null}
             />
         </div>
     );

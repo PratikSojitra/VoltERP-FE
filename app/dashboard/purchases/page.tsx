@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Plus, Edit, Trash2, ShoppingCart, Loader2 } from "lucide-react";
+import { Search, Plus, Edit, Trash2, ShoppingCart, Loader2, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
@@ -11,14 +11,20 @@ import { Purchase, Vendor } from "@/types/api";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
+import { PurchaseViewModal } from "./PurchaseViewModal";
 
 export default function PurchasesPage() {
     const router = useRouter();
     const [page, setPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     const { useGetPurchases, useDeletePurchase } = usePurchases();
+    const { useGetProfile } = useAuth();
     const { data: paginatedData, isLoading } = useGetPurchases(page, 10, searchQuery);
+    const { data: companyData } = useGetProfile();
     
     const purchases = paginatedData?.data || [];
     const totalPages = paginatedData?.totalPages || 1;
@@ -78,11 +84,18 @@ export default function PurchasesPage() {
             id: "actions",
             header: () => <div className="text-right">Actions</div>,
             cell: ({ row }) => (
-                <div className="flex justify-end gap-2 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => handleEdit(row.original)} className="p-2 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
+                <div className="flex justify-end gap-2">
+                    <button 
+                        onClick={() => { setSelectedPurchase(row.original); setIsPreviewOpen(true); }} 
+                        className="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" 
+                        title="View & Download PDF"
+                    >
+                        <FileText className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleEdit(row.original)} className="p-2 rounded-lg text-primary hover:bg-primary/10 transition-colors" title="Edit Purchase">
                         <Edit className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDelete(row.original._id)} className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">
+                    <button onClick={() => handleDelete(row.original._id)} className="p-2 rounded-lg text-destructive hover:bg-destructive/10 transition-colors" title="Delete Purchase">
                         <Trash2 className="w-4 h-4" />
                     </button>
                 </div>
@@ -139,6 +152,13 @@ export default function PurchasesPage() {
                     onPageChange={setPage}
                 />
             )}
+
+            <PurchaseViewModal
+                isOpen={isPreviewOpen}
+                onClose={() => setIsPreviewOpen(false)}
+                purchase={selectedPurchase}
+                company={companyData || null}
+            />
         </div>
     );
 }
