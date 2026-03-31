@@ -179,7 +179,7 @@ export default function InventoryPage() {
                 <div className="flex flex-wrap items-center gap-3">
                     <Combobox
                         value={
-                            filterStatus === "all" || !filterStatus 
+                            filterStatus === "all" || !filterStatus
                                 ? { label: "All Statuses", value: "all" }
                                 : { label: filterStatus, value: filterStatus }
                         }
@@ -189,15 +189,15 @@ export default function InventoryPage() {
                             setPage(1);
                         }}
                     >
-                        <ComboboxInput 
-                            placeholder="All Statuses" 
-                            className="h-10 min-w-36" 
+                        <ComboboxInput
+                            placeholder="All Statuses"
+                            className="h-10 min-w-36"
                         />
                         <ComboboxContent>
                             <ComboboxList>
                                 <ComboboxEmpty>No results found.</ComboboxEmpty>
                                 <ComboboxItem value={{ label: "All Statuses", value: "all" }}>All Statuses</ComboboxItem>
-                                <ComboboxItem value={{ label: "AVAILABLE", value: "AVAILABLE" }}>AVAILABLE</ComboboxItem>
+                                <ComboboxItem value={{ label: "IN_STOCK", value: "IN_STOCK" }}>IN_STOCK</ComboboxItem>
                                 <ComboboxItem value={{ label: "RESERVED", value: "RESERVED" }}>RESERVED</ComboboxItem>
                                 <ComboboxItem value={{ label: "SOLD", value: "SOLD" }}>SOLD</ComboboxItem>
                                 <ComboboxItem value={{ label: "DEFECTIVE", value: "DEFECTIVE" }}>DEFECTIVE</ComboboxItem>
@@ -248,7 +248,7 @@ export default function InventoryPage() {
                 item={editingItem}
             />
 
-            <ScannerModal 
+            <ScannerModal
                 isOpen={isScannerOpen}
                 onClose={() => setIsScannerOpen(false)}
                 onScanSuccess={handleScanSuccess}

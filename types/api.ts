@@ -70,7 +70,7 @@ export interface Inventory {
 
 export interface InvoiceItem {
     product: Product | string;
-    inventory?: Inventory | string;
+    inventory?: (Inventory | string)[];
     quantity: number;
     unitPrice: number;
     gstRate: number;
@@ -102,8 +102,11 @@ export interface Invoice {
 
 export interface Payment {
     _id: string;
-    invoice: Invoice | string;
-    customer: Customer | string;
+    invoice?: Invoice | string;
+    purchase?: Purchase | string;
+    customer?: Customer | string;
+    vendor?: Vendor | string;
+    type: 'SALES' | 'PURCHASE';
     amount: number;
     paymentDate: string;
     paymentMethod: string;
@@ -165,4 +168,29 @@ export interface PaginatedResponse<T> {
     page: number;
     limit: number;
     totalPages: number;
+}
+
+export interface DashboardStats {
+    revenue: number;
+    users: number;
+    entities: number;
+    inventoryItems: number;
+    recentSales: any[];
+    entityType: string;
+    // New Analytics
+    totalPurchases: number;
+    outstandingReceivables: number;
+    outstandingPayables: number;
+    totalSalesCollected: number;
+    totalPurchasePaid: number;
+    monthlyTrends: {
+        labels: string[];
+        sales: number[];
+        purchases: number[];
+    };
+    topProducts: {
+        name: string;
+        quantity: number;
+        revenue: number;
+    }[];
 }

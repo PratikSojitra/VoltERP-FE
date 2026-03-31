@@ -11,11 +11,12 @@ export const usePayments = () => {
         search?: string,
         status?: string,
         startDate?: string,
-        endDate?: string
+        endDate?: string,
+        type?: string
     ) => {
         return useQuery<PaginatedResponse<Payment>>({
-            queryKey: ["payments", page, limit, search, status, startDate, endDate],
-            queryFn: () => apiService.get<PaginatedResponse<Payment>>("/payment", { page, limit, search, status, startDate, endDate }),
+            queryKey: ["payments", page, limit, search, status, startDate, endDate, type],
+            queryFn: () => apiService.get<PaginatedResponse<Payment>>("/payment", { page, limit, search, status, startDate, endDate, type }),
         });
     };
 

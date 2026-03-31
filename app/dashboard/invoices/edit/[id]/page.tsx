@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormMultiCombobox } from "@/components/ui/form-multi-combobox";
 import { FormCombobox } from "@/components/ui/form-combobox";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useProducts } from "@/hooks/useProducts";
@@ -24,7 +25,7 @@ import { INDIAN_STATES } from "@/constants/states";
 
 const invoiceItemSchema = z.object({
     product: z.string().min(1, "Product is required"),
-    inventory: z.string().optional(),
+    inventory: z.array(z.string()).optional(),
     quantity: z.number().min(1, "Quantity must be at least 1"),
     unitPrice: z.number().min(0, "Price cannot be negative"),
     gstRate: z.number().min(0, "GST rate cannot be negative"),
@@ -58,7 +59,7 @@ export default function EditInvoicePage() {
 
     const { data: customersData } = useGetCustomers(1, 100);
     const { data: productsData } = useGetProducts(1, 100);
-    const { data: inventoryData } = useGetInventory(1, 1000);
+    const { data: inventoryData } = useGetInventory(1, 10000, undefined, 'IN_STOCK');
 
     const createCustomerMutation = useCreateCustomer();
     const updateCustomerMutation = useUpdateCustomer();
@@ -84,7 +85,7 @@ export default function EditInvoicePage() {
             invoiceNumber: "", // Will be set by useEffect shortly
             issueDate: dateToday,
             dueDate: "",
-            items: [{ product: "", inventory: "", quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0 }],
+            items: [{ product: "", inventory: [], quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0 }],
             notes: "",
             bankDetails: "",
             termsAndConditions: "1. All disputes are subject to jurisdiction.\n2. Payment is due within the stipulated days.",
@@ -114,7 +115,9 @@ export default function EditInvoicePage() {
             if (invoice.items?.length > 0) {
                 const newItems = invoice.items.map((item: any) => ({
                     product: typeof item.product === 'object' ? item.product._id : item.product,
-                    inventory: item.inventory ? (typeof item.inventory === 'object' ? item.inventory._id : item.inventory) : "",
+                    inventory: Array.isArray(item.inventory)
+                        ? item.inventory.map((inv: any) => typeof inv === 'object' ? inv._id : inv)
+                        : (item.inventory ? [typeof item.inventory === 'object' ? item.inventory._id : item.inventory] : []),
                     quantity: item.quantity,
                     unitPrice: item.unitPrice,
                     gstRate: item.gstRate,
@@ -362,7 +365,7 @@ export default function EditInvoicePage() {
             <div className="rounded-xl border border-border bg-card p-0 shadow-sm overflow-hidden flex flex-col">
                 <div className="p-6 border-b flex justify-between items-center bg-card">
                     <h3 className="font-semibold text-lg">Items / Products</h3>
-                    <Button type="button" variant="outline" size="sm" onClick={() => append({ product: "", inventory: "", quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0 })} className="gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ product: "", inventory: [], quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0 })} className="gap-2">
                         <Plus className="w-4 h-4" /> Add Item
                     </Button>
                 </div>
@@ -410,7 +413,7 @@ export default function EditInvoicePage() {
                                                             const gst = prod.gstRate || 0;
                                                             setValue(`items.${index}.unitPrice`, parseFloat(price.toFixed(2)), { shouldValidate: true });
                                                             setValue(`items.${index}.gstRate`, parseFloat(gst.toFixed(2)), { shouldValidate: true });
-                                                            setValue(`items.${index}.inventory`, "", { shouldValidate: true });
+                                                            setValue(`items.${index}.inventory`, [], { shouldValidate: true });
 
                                                             const qty = watch("items")[index].quantity || 0;
                                                             const t = (qty * price) * (1 + gst / 100);
@@ -418,26 +421,27 @@ export default function EditInvoicePage() {
                                                         } else {
                                                             setValue(`items.${index}.unitPrice`, 0, { shouldValidate: true });
                                                             setValue(`items.${index}.gstRate`, 18, { shouldValidate: true });
-                                                            setValue(`items.${index}.inventory`, "", { shouldValidate: true });
+                                                            setValue(`items.${index}.inventory`, [], { shouldValidate: true });
                                                             setValue(`items.${index}.totalPrice`, 0, { shouldValidate: true });
                                                         }
                                                     }}
                                                 />
                                                 {watchItems[index]?.product && (
-                                                    <FormCombobox
+                                                    <FormMultiCombobox
                                                         name={`items.${index}.inventory`}
                                                         control={control}
+                                                        maxCount={qty}
                                                         options={inventories
                                                             .filter((inv: any) => {
                                                                 const prodId = typeof inv.product === 'object' ? inv.product?._id : inv.product;
-                                                                return prodId === watchItems[index].product && inv.status === 'IN_STOCK';
+                                                                return prodId === watchItems[index].product && (inv.status === 'IN_STOCK' || (Array.isArray(watchItems[index]?.inventory) && watchItems[index]?.inventory.includes(inv._id)));
                                                             })
                                                             .map((inv: any) => ({
                                                                 label: `SN: ${inv.serialNumber}${inv.unitType ? ` - ${inv.unitType}` : ''}`,
                                                                 value: inv._id
                                                             }))
                                                         }
-                                                        placeholder="Select Serial No (Optional)"
+                                                        placeholder={`Select ${qty} Serial No...`}
                                                     />
                                                 )}
                                             </div>

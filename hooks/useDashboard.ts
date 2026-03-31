@@ -1,18 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiService } from "@/services/api.service";
 
-export interface DashboardStats {
-    revenue: number;
-    users: number;
-    entities: number;
-    inventoryItems: number;
-    recentSales: any[];
-    entityType: string;
-}
+import { DashboardStats } from "@/types/api";
 
-export const useDashboard = () => {
+export const useDashboard = (period: string = 'historical') => {
     return useQuery<DashboardStats>({
-        queryKey: ["dashboard", "stats"],
-        queryFn: () => apiService.get<DashboardStats>("/dashboard/stats"),
+        queryKey: ["dashboard", "stats", period],
+        queryFn: () => apiService.get<DashboardStats>("/dashboard/stats", { period }),
     });
 };

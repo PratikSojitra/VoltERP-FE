@@ -9,8 +9,8 @@ import {
     DrawerFooter,
     DrawerClose,
 } from "@/components/ui/drawer";
-import { Payment, Invoice, Customer } from "@/types/api";
-import { CreditCard, FileText, User, Calendar, Receipt, X, DollarSign, ArrowDownRight } from "lucide-react";
+import { Payment, Invoice, Customer, Purchase, Vendor } from "@/types/api";
+import { CreditCard, FileText, User, Calendar, Receipt, X, DollarSign, ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface PaymentViewModalProps {
@@ -23,7 +23,11 @@ export function PaymentViewModal({ isOpen, onClose, payment }: PaymentViewModalP
     if (!payment) return null;
 
     const invoice = payment.invoice as Invoice;
+    const purchase = payment.purchase as Purchase;
     const customer = payment.customer as Customer;
+    const vendor = payment.vendor as Vendor;
+
+    const isSales = payment.type === 'SALES';
 
     const formattedAmount = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(payment.amount);
 
@@ -32,12 +36,12 @@ export function PaymentViewModal({ isOpen, onClose, payment }: PaymentViewModalP
             <DrawerContent className="h-full flex flex-col sm:max-w-xl">
                 <DrawerHeader className="border-b px-6 py-4 flex flex-row items-center justify-between bg-muted/5">
                     <div className="flex items-center gap-3">
-                        <div className="bg-primary/10 p-2 rounded-lg">
-                            <CreditCard className="w-5 h-5 text-primary" />
+                        <div className={`p-2 rounded-lg ${isSales ? 'bg-primary/10' : 'bg-orange-500/10'}`}>
+                            <CreditCard className={`w-5 h-5 ${isSales ? 'text-primary' : 'text-orange-500'}`} />
                         </div>
                         <div>
                             <DrawerTitle className="text-xl font-bold">
-                                Payment Details
+                                {isSales ? 'Inward Payment' : 'Outward Payment'} Details
                             </DrawerTitle>
                             <p className="text-xs text-muted-foreground mt-0.5">
                                 Transaction history & reconciliation
@@ -56,11 +60,13 @@ export function PaymentViewModal({ isOpen, onClose, payment }: PaymentViewModalP
                         {/* Transaction Receipt Card */}
                         <div className="p-6 rounded-2xl border bg-card shadow-sm space-y-6 relative overflow-hidden group">
                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-15 transition-opacity">
-                                <DollarSign className="w-32 h-32 rotate-12" />
+                                {isSales ? <ArrowDownRight className="w-32 h-32 rotate-12" /> : <ArrowUpRight className="w-32 h-32 rotate-12" />}
                             </div>
                             <div className="space-y-1">
                                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Transaction Amount</p>
-                                <h3 className="text-4xl font-black text-foreground">{formattedAmount}</h3>
+                                <h3 className={`text-4xl font-black ${isSales ? 'text-emerald-600' : 'text-orange-600'}`}>
+                                    {isSales ? '+' : '-'}{formattedAmount}
+                                </h3>
                             </div>
                             <div className="flex items-center gap-4 text-xs font-medium uppercase tracking-wider text-muted-foreground pt-3 border-t">
                                 <span className={`px-2 py-1 rounded bg-muted border ${
@@ -69,34 +75,65 @@ export function PaymentViewModal({ isOpen, onClose, payment }: PaymentViewModalP
                                     'text-orange-500 border-orange-500/10 bg-orange-500/5'
                                 }`}>{payment.status || "COMPLETED"}</span>
                                 <span>{payment.paymentMethod?.replace("_", " ")}</span>
+                                <span className={`ml-auto px-2 py-1 rounded font-bold ${isSales ? 'bg-primary/10 text-primary' : 'bg-orange-500/10 text-orange-500'}`}>
+                                    {isSales ? 'SALES' : 'PURCHASE'}
+                                </span>
                             </div>
                         </div>
 
-                        {/* Invoice & Payer Profile */}
+                        {/* Profiles */}
                         <div className="space-y-4">
                             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Related Information</h3>
                             <div className="grid grid-cols-1 gap-4">
-                                <div className="flex items-center gap-4 p-4 rounded-xl border bg-card">
-                                    <div className="p-2 rounded-lg bg-primary/10">
-                                        <FileText className="w-4 h-4 text-primary" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground">Linked Invoice</p>
-                                        <p className="text-sm font-bold tracking-tight">{invoice?.invoiceNumber || "No Invoice Linked"}</p>
-                                    </div>
-                                    {invoice && <ArrowDownRight className="w-4 h-4 text-muted-foreground" />}
-                                </div>
+                                {isSales ? (
+                                    <>
+                                        <div className="flex items-center gap-4 p-4 rounded-xl border bg-card">
+                                            <div className="p-2 rounded-lg bg-primary/10">
+                                                <FileText className="w-4 h-4 text-primary" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-xs text-muted-foreground">Linked Invoice</p>
+                                                <p className="text-sm font-bold tracking-tight">{invoice?.invoiceNumber || "No Invoice Linked"}</p>
+                                            </div>
+                                            {invoice && <ArrowDownRight className="w-4 h-4 text-muted-foreground" />}
+                                        </div>
 
-                                <div className="flex items-center gap-4 p-4 rounded-xl border bg-card">
-                                    <div className="p-2 rounded-lg bg-primary/10">
-                                        <User className="w-4 h-4 text-primary" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground">Paying Customer</p>
-                                        <p className="text-sm font-bold tracking-tight">{customer?.name || "Unknown Customer"}</p>
-                                    </div>
-                                    <span className="text-xs font-medium bg-muted px-2 py-0.5 rounded text-muted-foreground">{customer?.phone || "No contact"}</span>
-                                </div>
+                                        <div className="flex items-center gap-4 p-4 rounded-xl border bg-card">
+                                            <div className="p-2 rounded-lg bg-primary/10">
+                                                <User className="w-4 h-4 text-primary" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-xs text-muted-foreground">Paying Customer</p>
+                                                <p className="text-sm font-bold tracking-tight">{customer?.name || "Unknown Customer"}</p>
+                                            </div>
+                                            <span className="text-xs font-medium bg-muted px-2 py-0.5 rounded text-muted-foreground">{customer?.phone || "No contact"}</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="flex items-center gap-4 p-4 rounded-xl border bg-card">
+                                            <div className="p-2 rounded-lg bg-orange-500/10">
+                                                <FileText className="w-4 h-4 text-orange-500" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-xs text-muted-foreground">Linked Purchase</p>
+                                                <p className="text-sm font-bold tracking-tight">{purchase?.invoiceNumber || "No Purchase Linked"}</p>
+                                            </div>
+                                            {purchase && <ArrowUpRight className="w-4 h-4 text-muted-foreground" />}
+                                        </div>
+
+                                        <div className="flex items-center gap-4 p-4 rounded-xl border bg-card">
+                                            <div className="p-2 rounded-lg bg-orange-500/10">
+                                                <User className="w-4 h-4 text-orange-500" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-xs text-muted-foreground">Vendor Paid</p>
+                                                <p className="text-sm font-bold tracking-tight">{vendor?.name || "Unknown Vendor"}</p>
+                                            </div>
+                                            <span className="text-xs font-medium bg-muted px-2 py-0.5 rounded text-muted-foreground">{vendor?.phone || "No contact"}</span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -109,6 +146,14 @@ export function PaymentViewModal({ isOpen, onClose, payment }: PaymentViewModalP
                                     <p className="text-sm font-semibold">{payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString(undefined, {
                                         year: 'numeric', month: 'long', day: 'numeric'
                                     }) : "N/A"}</p>
+                                </div>
+                             </div>
+
+                             <div className="flex items-center gap-3">
+                                <Receipt className="w-4 h-4 text-muted-foreground" />
+                                <div className="flex-1">
+                                    <p className="text-xs text-muted-foreground">Reference/UTR Number</p>
+                                    <p className="text-sm font-semibold">{payment.referenceNumber || "N/A"}</p>
                                 </div>
                              </div>
 

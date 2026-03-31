@@ -25,9 +25,10 @@ export default function PaymentsPage() {
     const [filterStatus, setFilterStatus] = useState<string>("");
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
+    const [activeTab, setActiveTab] = useState<'SALES' | 'PURCHASE'>('SALES');
 
     const { useGetPayments, useCreatePayment, useUpdatePayment, useDeletePayment } = usePayments();
-    const { data: paginatedData, isLoading } = useGetPayments(page, 10, searchQuery, filterStatus, startDate, endDate);
+    const { data: paginatedData, isLoading } = useGetPayments(page, 10, searchQuery, filterStatus, undefined, undefined, activeTab);
     const payments = paginatedData?.data || [];
     const totalPages = paginatedData?.totalPages || 1;
 
@@ -77,19 +78,32 @@ export default function PaymentsPage() {
             ),
         },
         {
-            accessorKey: "invoice",
-            header: "Invoice Info",
+            id: activeTab === 'SALES' ? "invoice" : "purchase",
+            header: activeTab === 'SALES' ? "Invoice Info" : "Purchase Info",
             cell: ({ row }) => {
-                const invoice = row.original.invoice as any;
-                const customer = row.original.customer as any;
-                return (
-                    <div>
-                        <div className="font-mono text-xs font-bold text-primary bg-primary/10 inline-block px-2 py-0.5 rounded">
-                            {invoice?.invoiceNumber || "No Invoice"}
+                if (activeTab === 'SALES') {
+                    const invoice = row.original.invoice as any;
+                    const customer = row.original.customer as any;
+                    return (
+                        <div>
+                            <div className="font-mono text-xs font-bold text-primary bg-primary/10 inline-block px-2 py-0.5 rounded">
+                                {invoice?.invoiceNumber || "No Invoice"}
+                            </div>
+                            <div className="text-muted-foreground mt-1 text-xs">{customer?.name || "Unknown"}</div>
                         </div>
-                        <div className="text-muted-foreground mt-1 text-xs">{customer?.name || "Unknown"}</div>
-                    </div>
-                )
+                    )
+                } else {
+                    const purchase = row.original.purchase as any;
+                    const vendor = row.original.vendor as any;
+                    return (
+                        <div>
+                            <div className="font-mono text-xs font-bold text-orange-500 bg-orange-500/10 inline-block px-2 py-0.5 rounded">
+                                {purchase?.invoiceNumber || "No Purchase"}
+                            </div>
+                            <div className="text-muted-foreground mt-1 text-xs">{vendor?.name || "Unknown"}</div>
+                        </div>
+                    )
+                }
             },
         },
         {
@@ -159,8 +173,6 @@ export default function PaymentsPage() {
         },
     ];
 
-
-
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -170,7 +182,7 @@ export default function PaymentsPage() {
                         Payments
                     </h2>
                     <p className="text-muted-foreground mt-1 text-sm">
-                        Record and reconcile invoice transactions across all payment methods.
+                        Record and reconcile transactions across all payment methods.
                     </p>
                 </div>
                 <button
@@ -182,11 +194,33 @@ export default function PaymentsPage() {
                 </button>
             </div>
 
+            {/* Tabs */}
+            <div className="flex border-b border-border">
+                <button
+                    onClick={() => { setActiveTab('SALES'); setPage(1); }}
+                    className={`px-6 py-3 text-sm font-semibold transition-colors relative ${activeTab === 'SALES' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                    Sales Payments
+                    {activeTab === 'SALES' && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                    )}
+                </button>
+                <button
+                    onClick={() => { setActiveTab('PURCHASE'); setPage(1); }}
+                    className={`px-6 py-3 text-sm font-semibold transition-colors relative ${activeTab === 'PURCHASE' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                    Purchase Payments
+                    {activeTab === 'PURCHASE' && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                    )}
+                </button>
+            </div>
+
             <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
                 <div className="relative flex-1 min-w-[280px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                     <Input
-                        placeholder="Search by ref or customer name..."
+                        placeholder={`Search by ref or ${activeTab === 'SALES' ? 'customer' : 'vendor'} name...`}
                         className="pl-9 h-10 w-full"
                         value={searchQuery}
                         onChange={(e) => {
@@ -282,6 +316,7 @@ export default function PaymentsPage() {
                 createMutation={createMutation}
                 updateMutation={updateMutation}
                 mode={modalMode}
+                defaultType={activeTab}
             />
 
             <PaymentViewModal

@@ -70,14 +70,17 @@ export const customerSchema = z.object({
 export type CustomerFormData = z.infer<typeof customerSchema>;
 
 export const paymentSchema = z.object({
-    invoice: z.string().min(1, "Invoice is required"),
-    customer: z.string().min(1, "Customer is required"),
+    invoice: z.string().optional().or(z.literal("")),
+    purchase: z.string().optional().or(z.literal("")),
+    customer: z.string().optional().or(z.literal("")),
+    vendor: z.string().optional().or(z.literal("")),
+    type: z.enum(["SALES", "PURCHASE"]).default("SALES"),
     amount: z.coerce.number().min(0.01, "Amount must be greater than 0"),
     paymentDate: z.string().min(1, "Payment date is required"),
     paymentMethod: z.enum(["CASH", "BANK_TRANSFER", "CHEQUE", "CREDIT_CARD", "UPI", "OTHER"]),
     status: z.enum(["COMPLETED", "PARTIAL", "FAILED", "PENDING"]),
     referenceNumber: z.string().optional().or(z.literal("")),
-    notes: z.string().optional(),
+    notes: z.string().optional().or(z.literal("")),
 });
 
 export type PaymentFormData = z.infer<typeof paymentSchema>;
