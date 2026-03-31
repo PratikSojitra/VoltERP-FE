@@ -54,7 +54,7 @@ export function FormMultiCombobox<T extends FieldValues>({
             name={name}
             control={control}
             render={({ field, fieldState: { error } }) => {
-                const values = Array.isArray(field.value) ? field.value : [];
+                const values: string[] = Array.isArray(field.value) ? field.value : [];
                 const selectedOptions = options.filter((o) => values.includes(o.value));
 
                 return (
