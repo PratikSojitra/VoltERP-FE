@@ -138,6 +138,7 @@ export interface PurchaseItem {
     gstRate?: number;
     totalPrice?: number;
     serialNumbers?: string[];
+    serialNumbersODU?: string[];
     unitType?: string;
 }
 

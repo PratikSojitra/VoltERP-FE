@@ -11,6 +11,13 @@ export const useInventory = () => {
             queryFn: () => apiService.get<PaginatedResponse<Inventory>>("/inventory", { page, limit, search, status }),
         });
     };
+    
+    const useGetGroupedInventory = () => {
+        return useQuery<any[]>({
+            queryKey: ["inventory", "grouped"],
+            queryFn: () => apiService.get<any[]>("/inventory/grouped"),
+        });
+    };
 
     const useGetInventoryItem = (id: string) => {
         return useQuery<Inventory>({
@@ -50,6 +57,7 @@ export const useInventory = () => {
 
     return {
         useGetInventory,
+        useGetGroupedInventory,
         useGetInventoryItem,
         useCreateInventory,
         useUpdateInventory,

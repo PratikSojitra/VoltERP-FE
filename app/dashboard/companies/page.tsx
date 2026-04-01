@@ -12,6 +12,7 @@ import { CompanyViewModal } from "./CompanyViewModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 export default function CompaniesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,6 +20,8 @@ export default function CompaniesPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [editingCompany, setEditingCompany] = useState<Company | null>(null);
     const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<string | null>(null);
 
     const { useGetCompanies, useCreateCompany, useUpdateCompany, useDeleteCompany } = useCompanies();
     const [page, setPage] = useState(1);
@@ -30,10 +33,23 @@ export default function CompaniesPage() {
     const deleteMutation = useDeleteCompany();
 
     const handleDelete = (id: string) => {
-        if (window.confirm("Are you sure you want to delete this company?")) {
-            deleteMutation.mutate(id, {
-                onSuccess: () => toast.success("Company deleted successfully"),
-                onError: (err: any) => toast.error(err.response?.data?.message || "Failed to delete company"),
+        setIdToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (idToDelete) {
+            deleteMutation.mutate(idToDelete, {
+                onSuccess: () => {
+                    toast.success("Company deleted successfully");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Failed to delete company");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
             });
         }
     };
@@ -185,6 +201,15 @@ export default function CompaniesPage() {
                 isOpen={isViewOpen}
                 onClose={() => setIsViewOpen(false)}
                 company={editingCompany}
+            />
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Company"
+                description="Are you sure you want to delete this company? This action cannot be undone."
+                isLoading={deleteMutation.isPending}
             />
         </div>
     );

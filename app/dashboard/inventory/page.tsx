@@ -21,17 +21,16 @@ import toast from "react-hot-toast";
 import { InventoryModal } from "./InventoryModal";
 import { InventoryViewModal } from "./InventoryViewModal";
 import { ScannerModal } from "./ScannerModal";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 export default function InventoryPage() {
     const [page, setPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState("");
     const [filterStatus, setFilterStatus] = useState<string>("");
 
-    const { useGetInventory, useCreateInventory, useUpdateInventory, useDeleteInventory } = useInventory();
+    const { useGetInventory, useCreateInventory, useUpdateInventory, useDeleteInventory, useGetGroupedInventory } = useInventory();
     const { useGetProducts } = useProducts();
-    const { data: paginatedData, isLoading: isInventoryLoading } = useGetInventory(page, 10, searchQuery, filterStatus);
-    const inventory = paginatedData?.data || [];
-    const totalPages = paginatedData?.totalPages || 1;
+    const { data: groupedData, isLoading: isGroupedLoading } = useGetGroupedInventory();
     const { data: products } = useGetProducts();
     const createMutation = useCreateInventory();
     const updateMutation = useUpdateInventory();
@@ -42,6 +41,8 @@ export default function InventoryPage() {
     const [isScannerOpen, setIsScannerOpen] = useState(false);
     const [scannedSerial, setScannedSerial] = useState("");
     const [editingItem, setEditingItem] = useState<Inventory | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<string | null>(null);
 
 
     const handleEdit = (item: Inventory) => {
@@ -55,10 +56,23 @@ export default function InventoryPage() {
     };
 
     const handleDelete = (id: string) => {
-        if (confirm("Are you sure you want to delete this inventory item?")) {
-            deleteMutation.mutate(id, {
-                onSuccess: () => toast.success("Item deleted successfully"),
-                onError: (err: any) => toast.error(err.response?.data?.message || "Failed to delete item"),
+        setIdToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (idToDelete) {
+            deleteMutation.mutate(idToDelete, {
+                onSuccess: () => {
+                    toast.success("Item deleted successfully");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Failed to delete item");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
             });
         }
     };
@@ -77,55 +91,82 @@ export default function InventoryPage() {
 
 
 
-    const columns: ColumnDef<Inventory>[] = [
+    const filteredGroupedData = (groupedData || []).filter((item: any) => {
+        const productName = item.product?.name || "Generic Product";
+        const serials = item.serialNumbers || [];
+        
+        const matchesSearch = productName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             serials.some((sn: any) => sn.serialNumber.toLowerCase().includes(searchQuery.toLowerCase()));
+        
+        if (!filterStatus || filterStatus === "") return matchesSearch;
+        
+        // If status filter is active, only show if product has items with that status
+        const hasStatus = serials.some((sn: any) => sn.status === filterStatus);
+        return matchesSearch && hasStatus;
+    });
+
+    const columns: ColumnDef<any>[] = [
         {
             accessorKey: "product",
-            header: "Inventory Item",
+            header: "Product",
             cell: ({ row }) => {
-                const product = row.original.product as Product;
+                const product = row.original.product;
                 return (
                     <div>
                         <div className="font-semibold text-foreground">{product?.name || "Unknown Product"}</div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                            <code className="bg-muted px-1.5 py-0.5 rounded text-xs text-muted-foreground font-mono">SN: {row.original.serialNumber}</code>
-                        </div>
+                        <div className="text-xs text-muted-foreground">{product?.type || "General"} Category</div>
                     </div>
                 );
             },
         },
         {
-            accessorKey: "unitType",
-            header: "Unit Type",
-            cell: ({ row }) => <div className="text-muted-foreground">{row.getValue("unitType")}</div>,
+            header: "Stock Summary",
+            cell: ({ row }) => {
+                const { inStock, sold, defective } = row.original;
+                return (
+                    <div className="flex gap-2">
+                        <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[10px] font-bold">
+                            IN STOCK: {inStock}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-bold">
+                            SOLD: {sold}
+                        </span>
+                        {defective > 0 && (
+                            <span className="px-2 py-0.5 rounded-md bg-destructive/10 text-destructive border border-destructive/20 text-[10px] font-bold">
+                                ERROR: {defective}
+                            </span>
+                        )}
+                    </div>
+                );
+            }
         },
         {
-            accessorKey: "status",
-            header: "Status",
+            header: "Serial Numbers",
             cell: ({ row }) => {
-                const status = row.getValue("status") as string;
+                const serials = row.original.serialNumbers || [];
                 return (
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${status === 'AVAILABLE' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                        status === 'SOLD' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                            'bg-destructive/10 text-destructive border-destructive/20'
-                        }`}>
-                        {status.replace("_", " ")}
-                    </span>
+                    <div className="flex flex-wrap gap-1 max-w-[300px]">
+                        {serials.slice(0, 3).map((sn: any) => (
+                            <code key={sn._id} className="bg-muted px-1.5 py-0.5 rounded text-[10px] text-muted-foreground font-mono">
+                                {sn.serialNumber}
+                            </code>
+                        ))}
+                        {serials.length > 3 && (
+                            <span className="text-[10px] text-muted-foreground font-medium pt-1">
+                                +{serials.length - 3} more
+                            </span>
+                        )}
+                    </div>
                 );
-            },
+            }
         },
         {
             id: "actions",
             header: () => <div className="text-right">Actions</div>,
             cell: ({ row }) => (
                 <div className="flex justify-end gap-2 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => handleView(row.original)} className="p-2 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors" title="View Full Info">
-                        <Eye className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => handleEdit(row.original)} className="p-2 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
-                        <Edit className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => handleDelete(row.original._id)} className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">
-                        <Trash2 className="w-4 h-4" />
+                    <button onClick={() => handleView(row.original)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors border border-transparent hover:border-primary/20">
+                        <Eye className="w-3.5 h-3.5" /> View All Serials
                     </button>
                 </div>
             ),
@@ -138,7 +179,7 @@ export default function InventoryPage() {
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
                         <PackageSearch className="w-8 h-8 text-primary/80" />
-                        Inventory
+                        Stocks
                     </h2>
                     <p className="text-muted-foreground mt-1 text-sm">
                         Track product serial numbers, statuses, and stock levels.
@@ -220,15 +261,15 @@ export default function InventoryPage() {
                 </div>
             </div>
 
-            {isInventoryLoading ? (
+            {isGroupedLoading ? (
                 <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
             ) : (
                 <DataTable
                     columns={columns}
-                    data={inventory}
-                    page={page}
-                    totalPages={totalPages}
-                    onPageChange={setPage}
+                    data={filteredGroupedData}
+                    page={1}
+                    totalPages={1}
+                    onPageChange={() => {}}
                 />
             )}
 
@@ -246,12 +287,23 @@ export default function InventoryPage() {
                 isOpen={isViewOpen}
                 onClose={() => setIsViewOpen(false)}
                 item={editingItem}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
             />
 
             <ScannerModal
                 isOpen={isScannerOpen}
                 onClose={() => setIsScannerOpen(false)}
                 onScanSuccess={handleScanSuccess}
+            />
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Stock Item"
+                description="Are you sure you want to delete this stock item? This will remove the serial number record from stock."
+                isLoading={deleteMutation.isPending}
             />
         </div>
     );

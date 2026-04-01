@@ -376,11 +376,15 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
                                     <View style={[styles.tableCol, { width: '4%' }]}><Text style={styles.tableCellCenter}>{index + 1}.</Text></View>
                                     <View style={[styles.tableCol, { width: '26%' }]}>
                                         <Text style={[styles.tableCell, styles.bold]}>{product?.name}</Text>
-                                        <Text style={{ fontSize: 7, fontStyle: 'italic', marginTop: 1 }}>
-                                            {item.inventory && Array.isArray(item.inventory) && item.inventory.length > 0 
-                                                ? `SN: ${item.inventory.map((inv: any) => typeof inv === 'object' ? inv.serialNumber : inv).join(', ')}` 
-                                                : (item.inventory && !Array.isArray(item.inventory) ? `SN: ${(item.inventory as any).serialNumber}` : '')}
-                                        </Text>
+                                        {(() => {
+                                            if (!item.inventory || !Array.isArray(item.inventory) || item.inventory.length === 0) return null;
+                                            const allSerials = item.inventory.map((inv: any) => typeof inv === 'object' ? inv.serialNumber : inv);
+                                            return (
+                                                <Text style={{ fontSize: 7, fontStyle: 'italic', marginTop: 1 }}>
+                                                    SN: {allSerials.join(', ')}
+                                                </Text>
+                                            );
+                                        })()}
                                     </View>
                                     <View style={[styles.tableCol, { width: '10%' }]}><Text style={styles.tableCellCenter}>{product?.hsnCode || '84151010'}</Text></View>
                                     <View style={[styles.tableCol, { width: '5%' }]}><Text style={styles.tableCellCenter}>{item.quantity.toFixed(2)}</Text></View>

@@ -50,8 +50,8 @@ export default function CreatePurchasePage() {
             invoiceNumber: "",
             vendor: "",
             purchaseDate: dateToday,
-            status: "PENDING",
-            items: [{ product: "", quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0, serialNumbers: [], unitType: "Standard Unit" }],
+            status: "COMPLETED",
+            items: [{ product: "", quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0, serialNumbers: [], serialNumbersODU: [], unitType: "Standard Unit" }],
             subTotal: 0,
             totalTax: 0,
             grandTotal: 0,
@@ -234,7 +234,7 @@ export default function CreatePurchasePage() {
                                 ]}
                                 placeholder="Select status..."
                             />
-                            <p className="text-[11px] text-muted-foreground mt-1">If Status is COMPLETED, these items will automatically be added to your Inventory.</p>
+                            <p className="text-[11px] text-muted-foreground mt-1">If Status is COMPLETED, these items will automatically be added to your Stocks.</p>
                         </div>
                     </div>
                 </div>
@@ -244,7 +244,7 @@ export default function CreatePurchasePage() {
             <div className="rounded-xl border border-border bg-card p-0 shadow-sm overflow-hidden flex flex-col">
                 <div className="p-6 border-b flex justify-between items-center bg-[var(--sidebar-background)]">
                     <h3 className="font-semibold text-lg">Purchase Items</h3>
-                    <Button type="button" variant="outline" size="sm" onClick={() => append({ product: "", quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0, serialNumbers: [], unitType: "Standard Unit" })} className="gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ product: "", quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0, serialNumbers: [], serialNumbersODU: [], unitType: "Standard Unit" })} className="gap-2">
                         <Plus className="w-4 h-4" /> Add Item
                     </Button>
                 </div>
@@ -388,39 +388,72 @@ export default function CreatePurchasePage() {
                                         {/* Sub row for Serial Numbers and Unit Type */}
                                         <tr className="bg-muted/10">
                                             <td colSpan={6} className="px-6 py-4 border-b border-border/50">
-                                                <div className="flex flex-col md:flex-row gap-5 items-start">
-                                                    <div className="w-full md:w-1/4">
-                                                        <FormCombobox
-                                                            name={`items.${index}.unitType`}
-                                                            control={control as any}
-                                                            label={`Unit Type for Item ${index + 1}`}
-                                                            options={[
-                                                                { label: "Standard Unit", value: "Standard Unit" },
-                                                                { label: "Indoor Unit (IDU)", value: "Indoor Unit (IDU)" },
-                                                                { label: "Outdoor Unit (ODU)", value: "Outdoor Unit (ODU)" },
-                                                                { label: "Box", value: "Box" },
-                                                                { label: "Piece", value: "Piece" },
-                                                            ]}
-                                                            placeholder="Select type..."
-                                                        />
-                                                    </div>
-                                                    <div className="w-full md:w-3/4 space-y-1 mt-6">
-                                                        <Label className="flex justify-between w-full">
-                                                            <span>Serial Numbers <span className="text-muted-foreground font-normal ml-1">(Type and hit enter)</span></span>
-                                                            <span className={`text-xs font-semibold px-2 py-[2px] rounded-full ${watchItems[index]?.serialNumbers?.length !== qty && watch('status') === 'COMPLETED' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
-                                                                {watchItems[index]?.serialNumbers?.length || 0} / {qty} scanned
-                                                            </span>
-                                                        </Label>
-                                                        <TagInput
-                                                            value={watchItems[index]?.serialNumbers || []}
-                                                            onChange={(newTags) => {
-                                                                setValue(`items.${index}.serialNumbers`, newTags, { shouldValidate: true });
-                                                            }}
-                                                            placeholder={`Scan or paste serial numbers...`}
-                                                            maxTags={qty}
-                                                        />
-                                                    </div>
-                                                </div>
+                                                {(() => {
+                                                    const prodId = watchItems[index]?.product;
+                                                    const prod = products.find((p: any) => p._id === prodId);
+                                                    const isAC = prod?.name?.toLowerCase().includes('ac') || prod?.name?.toLowerCase().includes('air condition');
+                                                    
+                                                    return (
+                                                        <div className="flex flex-col md:flex-row gap-5 items-start">
+                                                            {!isAC && (
+                                                                <div className="w-full md:w-1/4">
+                                                                    <FormCombobox
+                                                                        name={`items.${index}.unitType`}
+                                                                        control={control as any}
+                                                                        label={`Unit Type for Item ${index + 1}`}
+                                                                        options={[
+                                                                            { label: "Standard Unit", value: "Standard Unit" },
+                                                                            { label: "Indoor Unit (IDU)", value: "Indoor Unit (IDU)" },
+                                                                            { label: "Outdoor Unit (ODU)", value: "Outdoor Unit (ODU)" },
+                                                                            { label: "Box", value: "Box" },
+                                                                            { label: "Piece", value: "Piece" },
+                                                                        ]}
+                                                                        placeholder="Select type..."
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                            <div className={`w-full ${isAC ? 'md:w-full' : 'md:w-3/4'} space-y-4`}>
+                                                                <div className={isAC ? "grid grid-cols-1 md:grid-cols-2 gap-4" : ""}>
+                                                                    <div className="space-y-1">
+                                                                        <Label className="flex justify-between w-full">
+                                                                            <span>{isAC ? "Indoor Unit (IDU) Serials" : "Serial Numbers"} <span className="text-muted-foreground font-normal ml-1">(Type and hit enter)</span></span>
+                                                                            <span className={`text-xs font-semibold px-2 py-[2px] rounded-full ${watchItems[index]?.serialNumbers?.length !== qty && watch('status') === 'COMPLETED' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
+                                                                                {watchItems[index]?.serialNumbers?.length || 0} / {qty} scanned
+                                                                            </span>
+                                                                        </Label>
+                                                                        <TagInput
+                                                                            value={watchItems[index]?.serialNumbers || []}
+                                                                            onChange={(newTags) => {
+                                                                                setValue(`items.${index}.serialNumbers`, newTags, { shouldValidate: true });
+                                                                            }}
+                                                                            placeholder={`Scan or paste serial numbers...`}
+                                                                            maxTags={qty}
+                                                                        />
+                                                                    </div>
+
+                                                                    {isAC && (
+                                                                        <div className="space-y-1">
+                                                                            <Label className="flex justify-between w-full">
+                                                                                <span>Outdoor Unit (ODU) Serials <span className="text-muted-foreground font-normal ml-1">(Type and hit enter)</span></span>
+                                                                                <span className={`text-xs font-semibold px-2 py-[2px] rounded-full ${watchItems[index]?.serialNumbersODU?.length !== qty && watch('status') === 'COMPLETED' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
+                                                                                    {watchItems[index]?.serialNumbersODU?.length || 0} / {qty} scanned
+                                                                                </span>
+                                                                            </Label>
+                                                                            <TagInput
+                                                                                value={watchItems[index]?.serialNumbersODU || []}
+                                                                                onChange={(newTags) => {
+                                                                                    setValue(`items.${index}.serialNumbersODU`, newTags, { shouldValidate: true });
+                                                                                }}
+                                                                                placeholder={`Scan or paste ODU serial numbers...`}
+                                                                                maxTags={qty}
+                                                                            />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })()}
                                             </td>
                                         </tr>
                                     </React.Fragment>

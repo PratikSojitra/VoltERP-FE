@@ -9,6 +9,7 @@ import { useVendors } from "@/hooks/useVendors";
 import { Vendor } from "@/types/api";
 import toast from "react-hot-toast";
 import { VendorModal } from "./VendorModal";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 export default function VendorsPage() {
     const [page, setPage] = useState(1);
@@ -26,6 +27,8 @@ export default function VendorsPage() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<string | null>(null);
 
     const handleEdit = (vendor: Vendor) => {
         setEditingVendor(vendor);
@@ -33,10 +36,23 @@ export default function VendorsPage() {
     };
 
     const handleDelete = (id: string) => {
-        if (confirm("Are you sure you want to delete this vendor?")) {
-            deleteMutation.mutate(id, {
-                onSuccess: () => toast.success("Vendor deleted successfully"),
-                onError: (err: any) => toast.error(err.response?.data?.message || "Failed to delete vendor"),
+        setIdToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (idToDelete) {
+            deleteMutation.mutate(idToDelete, {
+                onSuccess: () => {
+                    toast.success("Vendor deleted successfully");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Failed to delete vendor");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
             });
         }
     };
@@ -139,6 +155,15 @@ export default function VendorsPage() {
                 editingVendor={editingVendor}
                 createMutation={createMutation}
                 updateMutation={updateMutation}
+            />
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Vendor"
+                description="Are you sure you want to delete this vendor?"
+                isLoading={deleteMutation.isPending}
             />
         </div>
     );

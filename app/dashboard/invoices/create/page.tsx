@@ -26,6 +26,8 @@ import { INDIAN_STATES } from "@/constants/states";
 const invoiceItemSchema = z.object({
     product: z.string().min(1, "Product is required"),
     inventory: z.array(z.string()).optional(),
+    inventoryIDU: z.array(z.string()).optional(),
+    inventoryODU: z.array(z.string()).optional(),
     quantity: z.number().min(1, "Quantity must be at least 1"),
     unitPrice: z.number().min(0, "Price cannot be negative"),
     gstRate: z.number().min(0, "GST rate cannot be negative"),
@@ -83,7 +85,7 @@ export default function CreateInvoicePage() {
             invoiceNumber: "", // Will be set by useEffect shortly
             issueDate: dateToday,
             dueDate: "",
-            items: [{ product: "", inventory: [], quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0 }],
+            items: [{ product: "", inventory: [], inventoryIDU: [], inventoryODU: [], quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0 }],
             notes: "",
             bankDetails: "",
             termsAndConditions: "1. All disputes are subject to jurisdiction.\n2. Payment is due within the stipulated days.",
@@ -179,11 +181,22 @@ export default function CreateInvoicePage() {
     const onSubmit = (data: InvoiceFormValues) => {
         console.log("🚀 ~ onSubmit ~ data:", data)
         // Enforce the computed totals onto the items array before calling API
-        const itemsWithTotals = data.items.map(item => ({
-            ...item,
-            inventory: item.inventory || undefined, // Strip if empty
-            // Backend will use unitPrice, gstRate and totalPrice
-        }));
+        const itemsWithTotals = data.items.map(item => {
+            let combinedInventory = item.inventory || [];
+            if (item.inventoryIDU && item.inventoryIDU.length > 0) {
+                combinedInventory = [...combinedInventory, ...item.inventoryIDU];
+            }
+            if (item.inventoryODU && item.inventoryODU.length > 0) {
+                combinedInventory = [...combinedInventory, ...item.inventoryODU];
+            }
+
+            return {
+                ...item,
+                inventory: combinedInventory.length > 0 ? combinedInventory : undefined,
+                inventoryIDU: undefined, // Strip temp fields
+                inventoryODU: undefined,
+            };
+        });
 
         const finalData = {
             ...data,
@@ -203,7 +216,7 @@ export default function CreateInvoicePage() {
         console.log("Submit Invoice Data:", finalData);
         createMutation.mutate(finalData, {
             onSuccess: () => {
-                toast.success("Invoice created successfully");
+                toast.success("Sales Invoice created successfully");
                 router.push("/dashboard/invoices");
             },
             onError: (err: any) => {
@@ -221,14 +234,14 @@ export default function CreateInvoicePage() {
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-foreground">Create Invoice</h2>
-                        <p className="text-muted-foreground text-sm">Draft a new invoice to bill your customer.</p>
+                        <h2 className="text-2xl font-bold tracking-tight text-foreground">Create Sales Invoice</h2>
+                        <p className="text-muted-foreground text-sm">Draft a new sales invoice to bill your customer.</p>
                     </div>
                 </div>
                 <div className="flex gap-3">
                     <Button variant="outline" onClick={() => router.back()}>Cancel</Button>
                     <Button onClick={handleSubmit(onSubmit)} className="gap-2">
-                        <Save className="w-4 h-4" /> Save Invoice
+                        <Save className="w-4 h-4" /> Save Sales Invoice
                     </Button>
                 </div>
             </div>
@@ -344,7 +357,7 @@ export default function CreateInvoicePage() {
             <div className="rounded-xl border border-border bg-card p-0 shadow-sm overflow-hidden flex flex-col">
                 <div className="p-6 border-b flex justify-between items-center bg-card">
                     <h3 className="font-semibold text-lg">Items / Products</h3>
-                    <Button type="button" variant="outline" size="sm" onClick={() => append({ product: "", inventory: [], quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0 })} className="gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ product: "", inventory: [], inventoryIDU: [], inventoryODU: [], quantity: 1, unitPrice: 0, gstRate: 18, totalPrice: 0 })} className="gap-2">
                         <Plus className="w-4 h-4" /> Add Item
                     </Button>
                 </div>
@@ -393,6 +406,8 @@ export default function CreateInvoicePage() {
                                                             setValue(`items.${index}.unitPrice`, parseFloat(price.toFixed(2)), { shouldValidate: true });
                                                             setValue(`items.${index}.gstRate`, parseFloat(gst.toFixed(2)), { shouldValidate: true });
                                                             setValue(`items.${index}.inventory`, [], { shouldValidate: true });
+                                                            setValue(`items.${index}.inventoryIDU`, [], { shouldValidate: true });
+                                                            setValue(`items.${index}.inventoryODU`, [], { shouldValidate: true });
 
                                                             const qty = watch("items")[index].quantity || 0;
                                                             const t = (qty * price) * (1 + gst / 100);
@@ -401,28 +416,92 @@ export default function CreateInvoicePage() {
                                                             setValue(`items.${index}.unitPrice`, 0, { shouldValidate: true });
                                                             setValue(`items.${index}.gstRate`, 18, { shouldValidate: true });
                                                             setValue(`items.${index}.inventory`, [], { shouldValidate: true });
+                                                            setValue(`items.${index}.inventoryIDU`, [], { shouldValidate: true });
+                                                            setValue(`items.${index}.inventoryODU`, [], { shouldValidate: true });
                                                             setValue(`items.${index}.totalPrice`, 0, { shouldValidate: true });
                                                         }
                                                     }}
                                                 />
-                                                {watchItems[index]?.product && (
-                                                    <FormMultiCombobox
-                                                        name={`items.${index}.inventory`}
-                                                        control={control}
-                                                        maxCount={qty}
-                                                        options={inventories
-                                                            .filter((inv: any) => {
-                                                                const prodId = typeof inv.product === 'object' ? inv.product?._id : inv.product;
-                                                                return prodId === watchItems[index].product && inv.status === 'IN_STOCK';
-                                                            })
-                                                            .map((inv: any) => ({
-                                                                label: `SN: ${inv.serialNumber}${inv.unitType ? ` - ${inv.unitType}` : ''}`,
-                                                                value: inv._id
-                                                            }))
-                                                        }
-                                                        placeholder={`Select ${qty} Serial No...`}
-                                                    />
-                                                )}
+                                                {watchItems[index]?.product && (() => {
+                                                    const prod = products.find((p: any) => p._id === watchItems[index].product);
+                                                    const isAC = prod?.name?.toLowerCase().includes('ac') || prod?.name?.toLowerCase().includes('air condition');
+
+                                                    if (isAC) {
+                                                        return (
+                                                            <div className="space-y-4 pt-2">
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                    <div className="space-y-1.5">
+                                                                        <Label className="text-xs font-semibold text-muted-foreground flex justify-between">
+                                                                            <span>Select Indoor Units (IDU)</span>
+                                                                            <span>{watchItems[index]?.inventoryIDU?.length || 0} / {qty}</span>
+                                                                        </Label>
+                                                                        <FormMultiCombobox
+                                                                            name={`items.${index}.inventoryIDU`}
+                                                                            control={control}
+                                                                            maxCount={qty}
+                                                                            options={inventories
+                                                                                .filter((inv: any) => {
+                                                                                    const prodId = typeof inv.product === 'object' ? inv.product?._id : inv.product;
+                                                                                    const uType = inv.unitType || "";
+                                                                                    return prodId === watchItems[index].product && inv.status === 'IN_STOCK' && (uType.includes('Indoor') || uType.includes('IDU'));
+                                                                                })
+                                                                                .map((inv: any) => ({
+                                                                                    label: `SN: ${inv.serialNumber}`,
+                                                                                    value: inv._id
+                                                                                }))
+                                                                            }
+                                                                            placeholder={`Select ${qty} IDU Serials...`}
+                                                                        />
+                                                                    </div>
+                                                                    <div className="space-y-1.5">
+                                                                        <Label className="text-xs font-semibold text-muted-foreground flex justify-between">
+                                                                            <span>Select Outdoor Units (ODU)</span>
+                                                                            <span>{watchItems[index]?.inventoryODU?.length || 0} / {qty}</span>
+                                                                        </Label>
+                                                                        <FormMultiCombobox
+                                                                            name={`items.${index}.inventoryODU`}
+                                                                            control={control}
+                                                                            maxCount={qty}
+                                                                            options={inventories
+                                                                                .filter((inv: any) => {
+                                                                                    const prodId = typeof inv.product === 'object' ? inv.product?._id : inv.product;
+                                                                                    const uType = inv.unitType || "";
+                                                                                    return prodId === watchItems[index].product && inv.status === 'IN_STOCK' && (uType.includes('Outdoor') || uType.includes('ODU'));
+                                                                                })
+                                                                                .map((inv: any) => ({
+                                                                                    label: `SN: ${inv.serialNumber}`,
+                                                                                    value: inv._id
+                                                                                }))
+                                                                            }
+                                                                            placeholder={`Select ${qty} ODU Serials...`}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <div className="pt-2">
+                                                            <FormMultiCombobox
+                                                                name={`items.${index}.inventory`}
+                                                                control={control}
+                                                                maxCount={qty}
+                                                                options={inventories
+                                                                    .filter((inv: any) => {
+                                                                        const prodId = typeof inv.product === 'object' ? inv.product?._id : inv.product;
+                                                                        return prodId === watchItems[index].product && inv.status === 'IN_STOCK';
+                                                                    })
+                                                                    .map((inv: any) => ({
+                                                                        label: `SN: ${inv.serialNumber}${inv.unitType ? ` - ${inv.unitType}` : ''}`,
+                                                                        value: inv._id
+                                                                    }))
+                                                                }
+                                                                placeholder={`Select ${qty} Serial No...`}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })()}
                                             </div>
                                         </td>
                                         <td className="px-4 py-4 align-top">

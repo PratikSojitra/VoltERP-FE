@@ -12,6 +12,7 @@ import { ProductViewModal } from "./ProductViewModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 export default function ProductsPage() {
     const [page, setPage] = useState(1);
@@ -29,6 +30,8 @@ export default function ProductsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<string | null>(null);
 
 
     const handleEdit = (product: Product) => {
@@ -42,10 +45,23 @@ export default function ProductsPage() {
     };
 
     const handleDelete = (id: string) => {
-        if (confirm("Are you sure you want to delete this product?")) {
-            deleteMutation.mutate(id, {
-                onSuccess: () => toast.success("Product deleted successfully"),
-                onError: (err: any) => toast.error(err.response?.data?.message || "Failed to delete product"),
+        setIdToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (idToDelete) {
+            deleteMutation.mutate(idToDelete, {
+                onSuccess: () => {
+                    toast.success("Product deleted successfully");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Failed to delete product");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
             });
         }
     };
@@ -178,6 +194,15 @@ export default function ProductsPage() {
                 isOpen={isViewOpen}
                 onClose={() => setIsViewOpen(false)}
                 product={editingProduct}
+            />
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Product"
+                description="Are you sure you want to delete this product?"
+                isLoading={deleteMutation.isPending}
             />
         </div>
     );

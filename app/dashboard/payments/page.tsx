@@ -17,6 +17,7 @@ import { usePayments } from "@/hooks/usePayments";
 import { Payment } from "@/types/api";
 import { PaymentModal } from "./PaymentModal";
 import { PaymentViewModal } from "./PaymentViewModal";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 import toast from "react-hot-toast";
 
 export default function PaymentsPage() {
@@ -40,6 +41,8 @@ export default function PaymentsPage() {
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
     const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<string | null>(null);
 
 
     const handleOpenModal = (payment?: Payment, mode: 'create' | 'edit' | 'view' = 'create') => {
@@ -53,10 +56,23 @@ export default function PaymentsPage() {
     };
 
     const handleDelete = (id: string) => {
-        if (confirm("Are you sure you want to delete this payment record?")) {
-            deleteMutation.mutate(id, {
-                onSuccess: () => toast.success("Payment deleted successfully"),
-                onError: (err: any) => toast.error(err.response?.data?.message || "Failed to delete payment"),
+        setIdToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (idToDelete) {
+            deleteMutation.mutate(idToDelete, {
+                onSuccess: () => {
+                    toast.success("Payment deleted successfully");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Failed to delete payment");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
             });
         }
     };
@@ -323,6 +339,15 @@ export default function PaymentsPage() {
                 isOpen={isViewOpen}
                 onClose={() => setIsViewOpen(false)}
                 payment={editingPayment}
+            />
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Payment"
+                description="Are you sure you want to delete this payment record?"
+                isLoading={deleteMutation.isPending}
             />
         </div>
     );

@@ -51,10 +51,10 @@ export function InventoryModal({ isOpen, onClose, editingItem, createMutation, u
         if (editingItem) {
             updateMutation.mutate({ id: editingItem._id, data }, {
                 onSuccess: () => {
-                    toast.success("Inventory updated successfully");
+                    toast.success("Stock updated successfully");
                     onClose();
                 },
-                onError: (err: any) => toast.error(err.response?.data?.message || "Failed to update inventory"),
+                onError: (err: any) => toast.error(err.response?.data?.message || "Failed to update stock"),
             });
         } else {
             createMutation.mutate(data, {
@@ -71,7 +71,7 @@ export function InventoryModal({ isOpen, onClose, editingItem, createMutation, u
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={editingItem ? "Edit Inventory" : "Add Inventory Item"}
+            title={editingItem ? "Edit Stock" : "Add Stock Item"}
             onSubmit={handleSubmit(onSubmit)}
             footer={
                 <>
@@ -83,7 +83,7 @@ export function InventoryModal({ isOpen, onClose, editingItem, createMutation, u
                         disabled={createMutation.isPending || updateMutation.isPending}
                     >
                         {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                        {editingItem ? "Update Inventory" : "Add Inventory"}
+                        {editingItem ? "Update Stock" : "Add Stock"}
                     </Button>
                 </>
             }

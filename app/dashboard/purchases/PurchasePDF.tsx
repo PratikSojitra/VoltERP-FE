@@ -344,11 +344,14 @@ export const PurchasePDF: React.FC<PurchasePDFProps> = ({ purchase, company: aut
                                     <View style={[styles.tableCol, { width: '4%' }]}><Text style={styles.tableCellCenter}>{index + 1}.</Text></View>
                                     <View style={[styles.tableCol, { width: '26%' }]}>
                                         <Text style={[styles.tableCell, styles.bold]}>{product?.name}</Text>
-                                        {item.serialNumbers && item.serialNumbers.length > 0 && (
-                                            <Text style={{ fontSize: 7, fontStyle: 'italic', marginTop: 1 }}>
-                                                SN: {item.serialNumbers.join(', ')}
-                                            </Text>
-                                        )}
+                                        {((item.serialNumbers && item.serialNumbers.length > 0) || (item.serialNumbersODU && item.serialNumbersODU.length > 0)) && (() => {
+                                            const allSerials = [...(item.serialNumbers || []), ...(item.serialNumbersODU || [])];
+                                            return (
+                                                <Text style={{ fontSize: 7, fontStyle: 'italic', marginTop: 1 }}>
+                                                    SN: {allSerials.join(', ')}
+                                                </Text>
+                                            );
+                                        })()}
                                     </View>
                                     <View style={[styles.tableCol, { width: '10%' }]}><Text style={styles.tableCellCenter}>{product?.hsnCode || '84151010'}</Text></View>
                                     <View style={[styles.tableCol, { width: '5%' }]}><Text style={styles.tableCellCenter}>{qty.toFixed(0)}</Text></View>

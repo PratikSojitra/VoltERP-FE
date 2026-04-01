@@ -9,6 +9,7 @@ import { useInvoices } from "@/hooks/useInvoices";
 import { Invoice } from "@/types/api";
 import { InvoiceModal } from "./InvoiceModal";
 import { InvoiceViewModal } from "./InvoiceViewModal";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 import toast from "react-hot-toast";
 import {
     Combobox,
@@ -35,6 +36,8 @@ export default function InvoicesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<string | null>(null);
 
     const deleteMutation = useDeleteInvoice();
 
@@ -44,10 +47,23 @@ export default function InvoicesPage() {
     };
 
     const handleDelete = (id: string) => {
-        if (window.confirm("Are you sure you want to delete this invoice?")) {
-            deleteMutation.mutate(id, {
-                onSuccess: () => toast.success("Invoice deleted"),
-                onError: () => toast.error("Failed to delete invoice"),
+        setIdToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (idToDelete) {
+            deleteMutation.mutate(idToDelete, {
+                onSuccess: () => {
+                    toast.success("Invoice deleted");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
+                onError: () => {
+                    toast.error("Failed to delete invoice");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
             });
         }
     };
@@ -141,7 +157,7 @@ export default function InvoicesPage() {
                      <div className="flex items-center gap-2 mb-1">
                         <FileText className="w-8 h-8 text-primary/80" />
                         <h2 className="text-3xl font-bold tracking-tight text-foreground">
-                            Invoices
+                            Sales Invoices
                         </h2>
                     </div>
                     <p className="text-muted-foreground text-sm">
@@ -153,7 +169,7 @@ export default function InvoicesPage() {
                     className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
                 >
                     <Plus className="w-4 h-4" />
-                    Create Invoice
+                    Create Sales Invoice
                 </Link>
             </div>
 
@@ -255,6 +271,15 @@ export default function InvoicesPage() {
                 isOpen={isViewModalOpen}
                 onClose={() => setIsViewModalOpen(false)}
                 invoice={selectedInvoice}
+            />
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Sales Invoice"
+                description="Are you sure you want to delete this sales invoice? This will also revert any associated stock to inventory and delete related payments."
+                isLoading={deleteMutation.isPending}
             />
         </div>
     );

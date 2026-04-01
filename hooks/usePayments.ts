@@ -33,6 +33,9 @@ export const usePayments = () => {
             mutationFn: (data: Partial<Payment>) => apiService.post<Payment>("/payment", data),
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["payments"] });
+                queryClient.invalidateQueries({ queryKey: ["invoices"] });
+                queryClient.invalidateQueries({ queryKey: ["purchases"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
             },
         });
     };
@@ -43,6 +46,9 @@ export const usePayments = () => {
                 apiService.patch<Payment>(`/payment/${id}`, data),
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["payments"] });
+                queryClient.invalidateQueries({ queryKey: ["invoices"] });
+                queryClient.invalidateQueries({ queryKey: ["purchases"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
             },
         });
     };
@@ -52,6 +58,9 @@ export const usePayments = () => {
             mutationFn: (id: string) => apiService.delete(`/payment/${id}`),
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["payments"] });
+                queryClient.invalidateQueries({ queryKey: ["invoices"] });
+                queryClient.invalidateQueries({ queryKey: ["purchases"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
             },
         });
     };

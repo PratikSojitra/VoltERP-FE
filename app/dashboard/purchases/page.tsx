@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { PurchaseViewModal } from "./PurchaseViewModal";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 export default function PurchasesPage() {
     const router = useRouter();
@@ -20,6 +21,8 @@ export default function PurchasesPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<string | null>(null);
 
     const { useGetPurchases, useDeletePurchase } = usePurchases();
     const { useGetProfile } = useAuth();
@@ -36,10 +39,23 @@ export default function PurchasesPage() {
     };
 
     const handleDelete = (id: string) => {
-        if (confirm("Are you sure you want to delete this purchase? This will also remove the items from inventory if it was completed.")) {
-            deleteMutation.mutate(id, {
-                onSuccess: () => toast.success("Purchase deleted successfully"),
-                onError: (err: any) => toast.error(err.response?.data?.message || "Failed to delete purchase"),
+        setIdToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (idToDelete) {
+            deleteMutation.mutate(idToDelete, {
+                onSuccess: () => {
+                    toast.success("Purchase deleted successfully");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Failed to delete purchase");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
             });
         }
     };
@@ -158,6 +174,15 @@ export default function PurchasesPage() {
                 onClose={() => setIsPreviewOpen(false)}
                 purchase={selectedPurchase}
                 company={companyData || null}
+            />
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Purchase"
+                description="Are you sure you want to delete this purchase? This will also remove the items from inventory if it was completed."
+                isLoading={deleteMutation.isPending}
             />
         </div>
     );

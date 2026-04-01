@@ -112,6 +112,7 @@ export const purchaseItemSchema = z.object({
     gstRate: z.coerce.number().min(0).optional(),
     totalPrice: z.coerce.number().min(0).optional(),
     serialNumbers: z.array(z.string()).optional(),
+    serialNumbersODU: z.array(z.string()).optional(),
     unitType: z.string().optional(),
 });
 

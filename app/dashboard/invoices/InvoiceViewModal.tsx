@@ -30,7 +30,7 @@ export function InvoiceViewModal({ isOpen, onClose, invoice }: InvoiceViewModalP
                 <DrawerHeader className="border-b px-6 py-4 flex flex-row items-center justify-between">
                     <div>
                         <DrawerTitle className="text-xl font-bold">
-                            Invoice: {invoice.invoiceNumber}
+                            Sales Invoice: {invoice.invoiceNumber}
                         </DrawerTitle>
                         <p className="text-xs text-muted-foreground mt-0.5">
                             PDF Preview & Download

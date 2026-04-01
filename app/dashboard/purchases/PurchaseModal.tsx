@@ -226,7 +226,7 @@ export function PurchaseModal({ isOpen, onClose, editingPurchase, createMutation
                                             onChange={(e) => handleSerialNumbersChange(index, e.target.value)}
                                             className="min-h-[80px]"
                                         />
-                                        <p className="text-[10px] text-muted-foreground">If Status is COMPLETED, these items will automatically be added to your Inventory.</p>
+                                        <p className="text-[10px] text-muted-foreground">If Status is COMPLETED, these items will automatically be added to your Stocks.</p>
                                     </div>
                                 </div>
                             </div>

@@ -25,6 +25,9 @@ export const usePurchases = () => {
             mutationFn: (data: any) => apiService.post<Purchase>("/purchases", data),
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["purchases"] });
+                queryClient.invalidateQueries({ queryKey: ["payments"] });
+                queryClient.invalidateQueries({ queryKey: ["inventory"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
             },
         });
     };
@@ -35,6 +38,9 @@ export const usePurchases = () => {
                 apiService.patch<Purchase>(`/purchases/${id}`, data),
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["purchases"] });
+                queryClient.invalidateQueries({ queryKey: ["payments"] });
+                queryClient.invalidateQueries({ queryKey: ["inventory"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
             },
         });
     };
@@ -44,6 +50,9 @@ export const usePurchases = () => {
             mutationFn: (id: string) => apiService.delete(`/purchases/${id}`),
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["purchases"] });
+                queryClient.invalidateQueries({ queryKey: ["payments"] });
+                queryClient.invalidateQueries({ queryKey: ["inventory"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
             },
         });
     };

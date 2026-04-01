@@ -12,6 +12,7 @@ import { CustomerViewModal } from "./CustomerViewModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 export default function CustomersPage() {
     const [page, setPage] = useState(1);
@@ -20,6 +21,8 @@ export default function CustomersPage() {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
     const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<string | null>(null);
 
     const { useGetCustomers, useCreateCustomer, useUpdateCustomer, useDeleteCustomer } = useCustomers();
     const { data: paginatedData, isLoading } = useGetCustomers(page, 10, searchQuery);
@@ -41,10 +44,23 @@ export default function CustomersPage() {
     };
 
     const handleDelete = (id: string) => {
-        if (confirm("Are you sure you want to delete this customer?")) {
-            deleteMutation.mutate(id, {
-                onSuccess: () => toast.success("Customer deleted successfully"),
-                onError: (err: any) => toast.error(err.response?.data?.message || "Failed to delete customer"),
+        setIdToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (idToDelete) {
+            deleteMutation.mutate(idToDelete, {
+                onSuccess: () => {
+                    toast.success("Customer deleted successfully");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Failed to delete customer");
+                    setIsDeleteModalOpen(false);
+                    setIdToDelete(null);
+                },
             });
         }
     };
@@ -180,6 +196,15 @@ export default function CustomersPage() {
                 isOpen={isViewModalOpen}
                 onClose={() => setIsViewModalOpen(false)}
                 customer={editingCustomer}
+            />
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Customer"
+                description="Are you sure you want to delete this customer?"
+                isLoading={deleteMutation.isPending}
             />
         </div>
     );

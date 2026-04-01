@@ -40,6 +40,9 @@ export const useInvoices = () => {
             mutationFn: (data: Partial<Invoice>) => apiService.post<Invoice>("/invoice", data),
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["invoices"] });
+                queryClient.invalidateQueries({ queryKey: ["payments"] });
+                queryClient.invalidateQueries({ queryKey: ["inventory"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
             },
         });
     };
@@ -50,6 +53,9 @@ export const useInvoices = () => {
                 apiService.patch<Invoice>(`/invoice/${id}`, data),
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["invoices"] });
+                queryClient.invalidateQueries({ queryKey: ["payments"] });
+                queryClient.invalidateQueries({ queryKey: ["inventory"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
             },
         });
     };
@@ -59,6 +65,9 @@ export const useInvoices = () => {
             mutationFn: (id: string) => apiService.delete(`/invoice/${id}`),
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["invoices"] });
+                queryClient.invalidateQueries({ queryKey: ["payments"] });
+                queryClient.invalidateQueries({ queryKey: ["inventory"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
             },
         });
     };
