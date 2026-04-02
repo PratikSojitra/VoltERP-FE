@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#000',
         padding: 5,
-        marginBottom: 10,
+        marginBottom: 0,
     },
     headerContainer: {
         flexDirection: 'row',
@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
     infoGrid: {
         flexDirection: 'row',
         borderWidth: 1,
+        borderTopWidth: 0,
         borderColor: '#000',
         marginBottom: 0,
     },
@@ -443,17 +444,17 @@ export const PurchasePDF: React.FC<PurchasePDFProps> = ({ purchase, company: aut
                         {isSameState ? (
                             <>
                                 <View style={styles.summaryRow}>
-                                    <Text style={styles.summaryLabel}>Add : CGST</Text>
+                                    <Text style={styles.summaryLabel}>CGST {((purchase.items[0]?.gstRate || 0) / 2).toFixed(2)}%</Text>
                                     <Text style={styles.summaryValue}>{formatCurrency(totalCgstSgstAmount)}</Text>
                                 </View>
                                 <View style={styles.summaryRow}>
-                                    <Text style={styles.summaryLabel}>Add : SGST</Text>
+                                    <Text style={styles.summaryLabel}>SGST {((purchase.items[0]?.gstRate || 0) / 2).toFixed(2)}%</Text>
                                     <Text style={styles.summaryValue}>{formatCurrency(totalCgstSgstAmount)}</Text>
                                 </View>
                             </>
                         ) : (
                             <View style={styles.summaryRow}>
-                                <Text style={styles.summaryLabel}>Add : IGST</Text>
+                                <Text style={styles.summaryLabel}>IGST {(purchase.items[0]?.gstRate || 0).toFixed(2)}%</Text>
                                 <Text style={styles.summaryValue}>{formatCurrency(totalTaxAmount)}</Text>
                             </View>
                         )}

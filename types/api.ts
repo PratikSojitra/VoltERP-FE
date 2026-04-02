@@ -151,6 +151,8 @@ export interface Purchase {
     totalTax?: number;
     grandTotal?: number;
     totalAmount: number;
+    paidAmount?: number;
+    outstandingAmount?: number;
     status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
     items: PurchaseItem[];
     company: string;

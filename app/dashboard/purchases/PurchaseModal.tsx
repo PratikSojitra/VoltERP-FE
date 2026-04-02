@@ -40,7 +40,7 @@ export function PurchaseModal({ isOpen, onClose, editingPurchase, createMutation
             vendor: "",
             purchaseDate: new Date().toISOString().split('T')[0],
             totalAmount: 0,
-            status: "PENDING",
+            status: "COMPLETED",
             items: [{ product: "", quantity: 1, unitPrice: 0, serialNumbers: [] }],
         }
     });
@@ -80,7 +80,7 @@ export function PurchaseModal({ isOpen, onClose, editingPurchase, createMutation
                     vendor: "",
                     purchaseDate: new Date().toISOString().split('T')[0],
                     totalAmount: 0,
-                    status: "PENDING",
+                    status: "COMPLETED",
                     items: [{ product: "", quantity: 1, unitPrice: 0, serialNumbers: [] }],
                 });
             }
@@ -234,20 +234,7 @@ export function PurchaseModal({ isOpen, onClose, editingPurchase, createMutation
                     })}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                    <div className="space-y-1.5">
-                        <FormSelect
-                            name="status"
-                            control={control as any}
-                            label="Invoice Status"
-                            options={[
-                                { label: "Pending", value: "PENDING" },
-                                { label: "Completed (Received)", value: "COMPLETED" },
-                                { label: "Cancelled", value: "CANCELLED" },
-                            ]}
-                            placeholder="Select Status"
-                        />
-                    </div>
+                <div className="flex justify-end border-t pt-4">
                     <div className="space-y-1.5 text-right">
                         <Label className="block text-muted-foreground mb-1">Total Amount (₹)</Label>
                         <div className="text-3xl font-bold bg-muted/50 inline-block px-4 py-2 rounded-xl text-primary border border-border">

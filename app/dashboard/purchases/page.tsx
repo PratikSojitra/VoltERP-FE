@@ -80,17 +80,48 @@ export default function PurchasesPage() {
             cell: ({ row }) => <div>{format(new Date(row.getValue("purchaseDate")), "PP")}</div>,
         },
         {
-            accessorKey: "totalAmount",
-            header: "Total Amount",
-            cell: ({ row }) => <div className="font-semibold text-primary">₹{(row.getValue("totalAmount") as number).toLocaleString()}</div>,
+            accessorKey: "grandTotal",
+            header: "Financials",
+            cell: ({ row }) => {
+                const grandTotal = row.original.grandTotal || row.original.totalAmount || 0;
+                const outstandingAmount = row.original.outstandingAmount || 0;
+                
+                const formattedTotal = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(grandTotal);
+                const pending = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(outstandingAmount);
+
+                return (
+                    <div>
+                        <div className="font-semibold text-primary">{formattedTotal}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5 font-bold uppercase tracking-tighter">
+                            {outstandingAmount > 0 ? `${pending} PENDING` : "FULLY PAID"}
+                        </div>
+                    </div>
+                );
+            },
         },
         {
-            accessorKey: "status",
-            header: "Status",
+            id: "paymentStatus",
+            header: "Payment",
             cell: ({ row }) => {
-                const status = row.getValue("status") as string;
+                const grandTotal = row.original.grandTotal || row.original.totalAmount || 0;
+                const outstandingAmount = row.original.outstandingAmount || 0;
+                
+                let status = "PAID";
+                let variant: "default" | "secondary" | "destructive" = "default";
+                
+                if (outstandingAmount <= 0) {
+                    status = "PAID";
+                    variant = "default";
+                } else if (outstandingAmount >= grandTotal) {
+                    status = "UNPAID";
+                    variant = "destructive";
+                } else {
+                    status = "PARTIAL";
+                    variant = "secondary";
+                }
+
                 return (
-                    <Badge variant={status === "COMPLETED" ? "default" : status === "PENDING" ? "secondary" : "destructive"}>
+                    <Badge variant={variant} className="text-[10px] font-black italic">
                         {status}
                     </Badge>
                 );

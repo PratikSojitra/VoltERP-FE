@@ -248,20 +248,7 @@ export default function EditPurchasePage() {
                             {errors.purchaseDate && <p className="text-xs text-destructive">{errors.purchaseDate.message}</p>}
                         </div>
                         
-                        <div className="space-y-1.5 col-span-2">
-                            <FormSelect
-                                name="status"
-                                control={control as any}
-                                label="Status *"
-                                options={[
-                                    { label: "Pending", value: "PENDING" },
-                                    { label: "Completed (Stock Received)", value: "COMPLETED" },
-                                    { label: "Cancelled", value: "CANCELLED" },
-                                ]}
-                                placeholder="Select status..."
-                            />
-                            <p className="text-[11px] text-muted-foreground mt-1">If Status is COMPLETED, these items will automatically be added to your Stocks.</p>
-                        </div>
+                        {/* Purchase Status is always COMPLETED (Received) */}
                     </div>
                 </div>
             </div>
