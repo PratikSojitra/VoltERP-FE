@@ -138,8 +138,18 @@ export function PaymentModal({ isOpen, onClose, editingPayment, createMutation, 
 
     const onSubmit = (data: PaymentFormData) => {
         if (isViewOnly) return;
+        
+        // Clean up empty strings for ID fields to avoid backend validation errors
+        const cleanedData = {
+            ...data,
+            invoice: data.invoice || undefined,
+            purchase: data.purchase || undefined,
+            customer: data.customer || undefined,
+            vendor: data.vendor || undefined,
+        };
+
         if (editingPayment) {
-            updateMutation.mutate({ id: editingPayment._id, data }, {
+            updateMutation.mutate({ id: editingPayment._id, data: cleanedData }, {
                 onSuccess: () => {
                     toast.success("Payment updated successfully");
                     onClose();
@@ -148,7 +158,7 @@ export function PaymentModal({ isOpen, onClose, editingPayment, createMutation, 
                 onError: (err: any) => toast.error(err.response?.data?.message || "Failed to update payment"),
             });
         } else {
-            createMutation.mutate(data, {
+            createMutation.mutate(cleanedData, {
                 onSuccess: () => {
                     toast.success("Payment created successfully");
                     onClose();

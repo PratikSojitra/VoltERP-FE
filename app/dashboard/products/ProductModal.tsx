@@ -46,9 +46,9 @@ export function ProductModal({ isOpen, onClose, editingProduct, createMutation, 
     useEffect(() => {
         if (selectedHsn) {
             const hsnInfo = HSN_DATA.find(h => h.code === selectedHsn);
-            // Only auto-fill if we are NOT in edit mode OR if the user manually changed the HSN
+            // Only auto-fill GST Rate if we are NOT in edit mode OR if the user manually changed the HSN
             if (hsnInfo && (!editingProduct || isDirty)) {
-                setValue("name", hsnInfo.description, { shouldValidate: true });
+                // We've removed name auto-fill as per user request
                 setValue("gstRate", hsnInfo.gstRate, { shouldValidate: true });
             }
         }
