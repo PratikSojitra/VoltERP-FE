@@ -284,6 +284,11 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
     };
 
     const capitalizeFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
+    const formatDate = (dateString: string | Date) => {
+        const d = new Date(dateString);
+        return `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`;
+    };
     const amountInWords = invoice.grandTotal ? capitalizeFirst(toWords(Math.floor(invoice.grandTotal)).replace(/-/g, ' ')) + ' Rupees Only' : '';
 
     const totalQuantity = invoice.items.reduce((acc, i) => acc + i.quantity, 0);
@@ -333,7 +338,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
                     </View>
                     <View style={styles.infoBoxLast}>
                         <View style={styles.infoRow}><Text style={styles.infoLabel}>Invoice No.</Text><Text style={styles.infoValue}>: {invoice.invoiceNumber}</Text></View>
-                        <View style={styles.infoRow}><Text style={styles.infoLabel}>Dated</Text><Text style={styles.infoValue}>: {invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString() : ''}</Text></View>
+                        <View style={styles.infoRow}><Text style={styles.infoLabel}>Dated</Text><Text style={styles.infoValue}>: {invoice.issueDate ? formatDate(invoice.issueDate) : ''}</Text></View>
                         <View style={styles.infoRow}><Text style={styles.infoLabel}>Place of Supply</Text><Text style={styles.infoValue}>: {invoice.placeOfSupply ? (INDIAN_STATES.find(s => s.code === invoice.placeOfSupply)?.name) : customerState} ({invoice.placeOfSupply || ''})</Text></View>
                         <View style={styles.infoRow}><Text style={styles.infoLabel}>Reverse Charge</Text><Text style={styles.infoValue}>: {invoice.reverseCharge ? 'Y' : 'N'}</Text></View>
                         <View style={styles.infoRow}><Text style={styles.infoLabel}>Site Name</Text><Text style={styles.infoValue}>: </Text></View>

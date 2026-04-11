@@ -244,6 +244,11 @@ export const PurchasePDF: React.FC<PurchasePDFProps> = ({ purchase, company: aut
     };
 
     const capitalizeFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
+    const formatDate = (dateString: string | Date) => {
+        const d = new Date(dateString);
+        return `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`;
+    };
     const amountInWords = (purchase.grandTotal || purchase.totalAmount) ? capitalizeFirst(toWords(Math.floor(purchase.grandTotal || purchase.totalAmount)).replace(/-/g, ' ')) + ' Rupees Only' : '';
 
     const totalQuantity = purchase.items.reduce((acc, i) => acc + (i.quantity || 0), 0);
@@ -299,7 +304,7 @@ export const PurchasePDF: React.FC<PurchasePDFProps> = ({ purchase, company: aut
                     </View>
                     <View style={styles.infoBoxLast}>
                         <View style={styles.infoRow}><Text style={styles.infoLabel}>Bill No.</Text><Text style={styles.infoValue}>: {purchase.invoiceNumber}</Text></View>
-                        <View style={styles.infoRow}><Text style={styles.infoLabel}>Dated</Text><Text style={styles.infoValue}>: {purchase.purchaseDate ? new Date(purchase.purchaseDate).toLocaleDateString() : ''}</Text></View>
+                        <View style={styles.infoRow}><Text style={styles.infoLabel}>Dated</Text><Text style={styles.infoValue}>: {purchase.purchaseDate ? formatDate(purchase.purchaseDate) : ''}</Text></View>
                         <View style={styles.infoRow}><Text style={styles.infoLabel}>Place of Supply</Text><Text style={styles.infoValue}>: {companyState}</Text></View>
                         <View style={styles.infoRow}><Text style={styles.infoLabel}>Reverse Charge</Text><Text style={styles.infoValue}>: N</Text></View>
                     </View>
