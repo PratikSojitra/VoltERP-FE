@@ -58,6 +58,7 @@ export function PaymentModal({ isOpen, onClose, editingPayment, createMutation, 
     });
 
     const activeType = watch("type");
+    const currentAmount = watch("amount");
 
     useEffect(() => {
         if (isOpen) {
@@ -136,9 +137,27 @@ export function PaymentModal({ isOpen, onClose, editingPayment, createMutation, 
         }
     }, [selectedPurchase, editingPayment, setValue, activeType]);
 
+    useEffect(() => {
+        let outstanding = 0;
+        if (activeType === 'SALES' && selectedInvoice) {
+            outstanding = selectedInvoice.outstandingAmount || 0;
+        } else if (activeType === 'PURCHASE' && selectedPurchase) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            outstanding = (selectedPurchase as any).outstandingAmount || 0;
+        }
+
+        if (outstanding > 0 && currentAmount > 0 && !editingPayment) {
+            if (currentAmount < outstanding) {
+                setValue("status", "PARTIAL", { shouldValidate: true });
+            } else if (currentAmount >= outstanding) {
+                setValue("status", "COMPLETED", { shouldValidate: true });
+            }
+        }
+    }, [currentAmount, selectedInvoice, selectedPurchase, activeType, setValue, editingPayment]);
+
     const onSubmit = (data: PaymentFormData) => {
         if (isViewOnly) return;
-        
+
         // Clean up empty strings for ID fields to avoid backend validation errors
         const cleanedData = {
             ...data,
@@ -204,19 +223,19 @@ export function PaymentModal({ isOpen, onClose, editingPayment, createMutation, 
                         <Label>Transaction Type</Label>
                         <div className="flex gap-4">
                             <label className="flex items-center gap-2 cursor-pointer">
-                                <input 
-                                    type="radio" 
-                                    {...register("type")} 
-                                    value="SALES" 
+                                <input
+                                    type="radio"
+                                    {...register("type")}
+                                    value="SALES"
                                     disabled={!!editingPayment || isViewOnly}
                                 />
                                 <span className={activeType === 'SALES' ? 'font-semibold text-primary' : ''}>Sales (Inward)</span>
                             </label>
                             <label className="flex items-center gap-2 cursor-pointer">
-                                <input 
-                                    type="radio" 
-                                    {...register("type")} 
-                                    value="PURCHASE" 
+                                <input
+                                    type="radio"
+                                    {...register("type")}
+                                    value="PURCHASE"
                                     disabled={!!editingPayment || isViewOnly}
                                 />
                                 <span className={activeType === 'PURCHASE' ? 'font-semibold text-orange-500' : ''}>Purchase (Outward)</span>
@@ -368,7 +387,7 @@ export function PaymentModal({ isOpen, onClose, editingPayment, createMutation, 
                             {errors.paymentMethod && <p className="text-xs text-destructive">{errors.paymentMethod.message as string}</p>}
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Status <span className="text-destructive">*</span></Label>
+                            <Label>Status</Label>
                             <FormCombobox<PaymentFormData>
                                 name="status"
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -379,8 +398,8 @@ export function PaymentModal({ isOpen, onClose, editingPayment, createMutation, 
                                     { label: 'Pending', value: 'PENDING' },
                                     { label: 'Failed', value: 'FAILED' },
                                 ]}
-                                placeholder="Select Status"
-                                disabled={isViewOnly}
+                                placeholder="Calculated automatically"
+                                disabled={true}
                             />
                             {errors.status && <p className="text-xs text-destructive">{errors.status.message as string}</p>}
                         </div>
