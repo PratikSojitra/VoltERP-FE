@@ -124,11 +124,31 @@ export default function PaymentsPage() {
         },
         {
             accessorKey: "amount",
-            header: "Amount Captured",
+            header: "Payment Details",
             cell: ({ row }) => {
                 const amount = parseFloat(row.getValue("amount") || "0");
                 const formatted = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(amount);
-                return <div className="font-medium text-foreground">{formatted}</div>;
+                
+                let outstanding = 0;
+                if (activeTab === 'SALES') {
+                    const invoice = row.original.invoice as any;
+                    outstanding = invoice?.outstandingAmount || 0;
+                } else {
+                    const purchase = row.original.purchase as any;
+                    outstanding = purchase?.outstandingAmount || 0;
+                }
+                const formattedOutstanding = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(outstanding);
+
+                return (
+                    <div>
+                        <div className="font-medium text-foreground">{formatted} <span className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider ml-1">Paid</span></div>
+                        {outstanding > 0 ? (
+                            <div className="text-xs text-orange-500 font-semibold mt-0.5">{formattedOutstanding} <span className="text-[10px] uppercase font-bold tracking-wider ml-0.5">Due</span></div>
+                        ) : (
+                            <div className="text-xs text-emerald-500 font-semibold mt-0.5"><span className="text-[10px] uppercase font-bold tracking-wider">Fully Paid</span></div>
+                        )}
+                    </div>
+                );
             },
         },
         {

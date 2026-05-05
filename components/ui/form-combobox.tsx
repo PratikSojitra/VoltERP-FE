@@ -41,12 +41,22 @@ export function FormCombobox<T extends FieldValues>({
     className,
     onChange,
 }: FormComboboxProps<T>) {
+    const [inputValue, setInputValue] = React.useState("");
+
     return (
         <Controller
             name={name}
             control={control}
             render={({ field, fieldState: { error } }) => {
                 const selectedOption = options.find((o) => o.value === field.value) || null;
+
+                const filteredOptions = React.useMemo(() => {
+                    if (!inputValue || (selectedOption && inputValue === selectedOption.label)) {
+                        return options;
+                    }
+                    const lower = inputValue.toLowerCase();
+                    return options.filter((o) => o.label.toLowerCase().includes(lower));
+                }, [options, inputValue, selectedOption]);
 
                 return (
                     <div className={cn("space-y-1.5", className)}>
@@ -64,6 +74,7 @@ export function FormCombobox<T extends FieldValues>({
                                     onChange(newValue);
                                 }
                             }}
+                            onInputValueChange={(val) => setInputValue(val)}
                             disabled={disabled}
                         >
                             <ComboboxInput
@@ -73,7 +84,7 @@ export function FormCombobox<T extends FieldValues>({
                             <ComboboxContent>
                                 <ComboboxList>
                                     <ComboboxEmpty>No results found.</ComboboxEmpty>
-                                    {options.map((option) => (
+                                    {filteredOptions.map((option) => (
                                         <ComboboxItem key={option.value} value={option}>
                                             {option.label}
                                         </ComboboxItem>

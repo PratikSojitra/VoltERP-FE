@@ -177,7 +177,7 @@ export default function PurchasesPage() {
                 <div className="relative flex-1 min-w-[280px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                     <Input
-                        placeholder="Search by invoice number..."
+                        placeholder="Search by ref, vendor, product, or serial no..."
                         className="pl-9 h-10 w-full"
                         value={searchQuery}
                         onChange={(e) => {

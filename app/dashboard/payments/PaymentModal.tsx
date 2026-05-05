@@ -78,7 +78,7 @@ export function PaymentModal({ isOpen, onClose, editingPayment, createMutation, 
                     customer: customerId || "",
                     vendor: vendorId || "",
                     type: editingPayment.type || 'SALES',
-                    amount: editingPayment.amount || 0,
+                    amount: 0, // Will be updated by useEffect using outstandingAmount
                     paymentDate: editingPayment.paymentDate ? new Date(editingPayment.paymentDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     paymentMethod: editingPayment.paymentMethod as any || "BANK_TRANSFER",
@@ -112,30 +112,30 @@ export function PaymentModal({ isOpen, onClose, editingPayment, createMutation, 
     const selectedPurchase = purchases.find(p => p._id === selectedPurchaseId);
 
     useEffect(() => {
-        if (!editingPayment && selectedInvoice && activeType === 'SALES') {
+        if (selectedInvoice && activeType === 'SALES') {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const customerId = typeof selectedInvoice.customer === 'string' ? selectedInvoice.customer : (selectedInvoice.customer as any)?._id || "";
             if (customerId) {
                 setValue("customer", customerId, { shouldValidate: true });
             }
-            if (selectedInvoice.outstandingAmount !== undefined && selectedInvoice.outstandingAmount > 0) {
+            if (selectedInvoice.outstandingAmount !== undefined && selectedInvoice.outstandingAmount >= 0) {
                 setValue("amount", selectedInvoice.outstandingAmount, { shouldValidate: true });
             }
         }
-    }, [selectedInvoice, editingPayment, setValue, activeType]);
+    }, [selectedInvoice, setValue, activeType]);
 
     useEffect(() => {
-        if (!editingPayment && selectedPurchase && activeType === 'PURCHASE') {
+        if (selectedPurchase && activeType === 'PURCHASE') {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const vendorId = typeof selectedPurchase.vendor === 'string' ? selectedPurchase.vendor : (selectedPurchase.vendor as any)?._id || "";
             if (vendorId) {
                 setValue("vendor", vendorId, { shouldValidate: true });
             }
-            if ((selectedPurchase as any).outstandingAmount !== undefined && (selectedPurchase as any).outstandingAmount > 0) {
+            if ((selectedPurchase as any).outstandingAmount !== undefined && (selectedPurchase as any).outstandingAmount >= 0) {
                 setValue("amount", (selectedPurchase as any).outstandingAmount, { shouldValidate: true });
             }
         }
-    }, [selectedPurchase, editingPayment, setValue, activeType]);
+    }, [selectedPurchase, setValue, activeType]);
 
     useEffect(() => {
         let outstanding = 0;
@@ -146,10 +146,14 @@ export function PaymentModal({ isOpen, onClose, editingPayment, createMutation, 
             outstanding = (selectedPurchase as any).outstandingAmount || 0;
         }
 
-        if (outstanding > 0 && currentAmount > 0 && !editingPayment) {
-            if (currentAmount < outstanding) {
-                setValue("status", "PARTIAL", { shouldValidate: true });
-            } else if (currentAmount >= outstanding) {
+        if (currentAmount > 0) {
+            if (outstanding > 0) {
+                if (currentAmount < outstanding) {
+                    setValue("status", "PARTIAL", { shouldValidate: true });
+                } else if (currentAmount >= outstanding) {
+                    setValue("status", "COMPLETED", { shouldValidate: true });
+                }
+            } else if (outstanding === 0) {
                 setValue("status", "COMPLETED", { shouldValidate: true });
             }
         }

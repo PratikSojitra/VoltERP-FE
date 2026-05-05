@@ -10,8 +10,9 @@ import {
     DrawerClose,
 } from "@/components/ui/drawer";
 import { Payment, Invoice, Customer, Purchase, Vendor } from "@/types/api";
-import { CreditCard, FileText, User, Calendar, Receipt, X, DollarSign, ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { CreditCard, FileText, User, Calendar, Receipt, X, DollarSign, ArrowDownRight, ArrowUpRight, History, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePayments } from "@/hooks/usePayments";
 
 interface PaymentViewModalProps {
     isOpen: boolean;
@@ -30,6 +31,8 @@ export function PaymentViewModal({ isOpen, onClose, payment }: PaymentViewModalP
     const isSales = payment.type === 'SALES';
 
     const formattedAmount = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(payment.amount);
+
+    const relatedPayments = (payment as any).history || [];
 
     return (
         <Drawer open={isOpen} onOpenChange={onClose} direction="right">
@@ -165,6 +168,55 @@ export function PaymentViewModal({ isOpen, onClose, payment }: PaymentViewModalP
                                 </div>
                              </div>
                         </div>
+
+                        {/* Payment History for this Invoice/Purchase */}
+                        {isOpen && (
+                            <div className="space-y-4 pt-4 border-t border-dashed">
+                                <div className="flex items-center gap-2">
+                                    <History className="w-4 h-4 text-muted-foreground" />
+                                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                                        Related Payment History
+                                    </h3>
+                                </div>
+                                
+                                {relatedPayments.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {relatedPayments.map((historyRecord: any, index: number) => (
+                                            <div 
+                                                key={historyRecord._id || index} 
+                                                className={`p-3 rounded-xl border flex items-center justify-between text-sm bg-card`}
+                                            >
+                                                <div>
+                                                    <p className="font-semibold text-foreground flex items-center gap-2">
+                                                        {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(historyRecord.amount)}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                                        {historyRecord.paymentDate ? new Date(historyRecord.paymentDate).toLocaleDateString() : 'N/A'} • {historyRecord.paymentMethod?.replace('_', ' ')}
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-500`}>
+                                                        COMPLETED
+                                                    </span>
+                                                    {historyRecord.referenceNumber && (
+                                                        <p className="text-[10px] text-muted-foreground mt-1 truncate max-w-[100px]">
+                                                            Ref: {historyRecord.referenceNumber}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div className="pt-2 text-xs text-muted-foreground text-center">
+                                            Total {relatedPayments.length} transaction(s) found.
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="p-4 rounded-xl border border-dashed text-center text-sm text-muted-foreground">
+                                        No transaction history found.
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 
