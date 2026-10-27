@@ -92,6 +92,7 @@ export interface Invoice {
     dueDate: string;
     company: string | Company;
     placeOfSupply?: string;
+    siteName?: string;
     reverseCharge?: boolean;
     notes?: string;
     bankDetails?: string;

@@ -341,7 +341,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
                         <View style={styles.infoRow}><Text style={styles.infoLabel}>Dated</Text><Text style={styles.infoValue}>: {invoice.issueDate ? formatDate(invoice.issueDate) : ''}</Text></View>
                         <View style={styles.infoRow}><Text style={styles.infoLabel}>Place of Supply</Text><Text style={styles.infoValue}>: {invoice.placeOfSupply ? (INDIAN_STATES.find(s => s.code === invoice.placeOfSupply)?.name) : customerState} ({invoice.placeOfSupply || ''})</Text></View>
                         <View style={styles.infoRow}><Text style={styles.infoLabel}>Reverse Charge</Text><Text style={styles.infoValue}>: {invoice.reverseCharge ? 'Y' : 'N'}</Text></View>
-                        <View style={styles.infoRow}><Text style={styles.infoLabel}>Site Name</Text><Text style={styles.infoValue}>: </Text></View>
+                        <View style={styles.infoRow}><Text style={styles.infoLabel}>Site Name</Text><Text style={styles.infoValue}>: {invoice.siteName || ''}</Text></View>
                     </View>
                 </View>
 

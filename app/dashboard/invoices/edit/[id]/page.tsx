@@ -44,6 +44,7 @@ const createInvoiceSchema = z.object({
     bankDetails: z.string().optional(),
     termsAndConditions: z.string().optional(),
     placeOfSupply: z.string().optional(),
+    siteName: z.string().optional(),
     reverseCharge: z.boolean().optional(),
 });
 
@@ -92,6 +93,7 @@ export default function EditInvoicePage() {
             bankDetails: "",
             termsAndConditions: "1. All disputes are subject to jurisdiction.\n2. Payment is due within the stipulated days.",
             placeOfSupply: "",
+            siteName: "",
             reverseCharge: false,
         },
     });
@@ -112,6 +114,7 @@ export default function EditInvoicePage() {
                 setValue("bankDetails", invoice.bankDetails || "");
                 setValue("termsAndConditions", invoice.termsAndConditions || "");
                 setValue("placeOfSupply", invoice.placeOfSupply || "");
+                setValue("siteName", invoice.siteName || "");
                 setValue("reverseCharge", invoice.reverseCharge || false);
                 
                 if (invoice.items?.length > 0) {
@@ -249,6 +252,7 @@ export default function EditInvoicePage() {
             ...data,
             dueDate: data.dueDate || undefined,
             placeOfSupply: data.placeOfSupply || undefined,
+            siteName: data.siteName || undefined,
             notes: data.notes || undefined,
             bankDetails: data.bankDetails || undefined,
             termsAndConditions: data.termsAndConditions || undefined,
@@ -395,6 +399,11 @@ export default function EditInvoicePage() {
                                 placeholder="Select State..."
                             />
                             <p className="text-[11px] text-muted-foreground">Overrides Customer's state for GST rule calculation.</p>
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label>Site Name (Optional)</Label>
+                            <Input placeholder="Enter site name..." {...register("siteName")} />
+                            <p className="text-[11px] text-muted-foreground">Location or site name printed on the invoice.</p>
                         </div>
                     </div>
                 </div>
